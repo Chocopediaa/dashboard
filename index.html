@@ -78,6 +78,22 @@
         .frm-cat-card { transition: all .2s; cursor: pointer; }
         .frm-cat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,70,229,.12); }
         .frm-row:hover { background: #f8faff; }
+        /* NMS JIPD */
+        .nms-row { transition: background .15s; cursor: pointer; }
+        .nms-row:hover { background: #f8faff !important; }
+        .nms-filter-btn { font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 8px; transition: all .2s; cursor: pointer; border: none; background: transparent; }
+        .nms-filter-btn.active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        @keyframes nms-blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .nms-blink { animation: nms-blink 1.4s infinite; }
+        .nms-pg-tab { font-size: 10px; font-weight: 800; padding: 10px 18px; border-bottom: 3px solid transparent; color: #64748b; transition: all .15s; cursor: pointer; border: none; border-bottom: 3px solid transparent; background: transparent; }
+        .nms-pg-tab.active { border-bottom-color: #4f46e5; color: #4f46e5; }
+        .nms-pg-tab:hover:not(.active) { color: #475569; background: #f8fafc; }
+        .nms-sort-th { cursor: pointer; user-select: none; }
+        .nms-sort-th:hover { color: #4f46e5 !important; }
+        /* Topology */
+        .topo-node { transition: filter .2s, transform .2s; cursor: pointer; }
+        .topo-node:hover { filter: drop-shadow(0 4px 8px rgba(79,70,229,.35)); transform-origin: center; }
+        .topo-link { transition: stroke-width .2s; }
     </style>
 </head>
 <body class="flex h-screen">
@@ -1595,6 +1611,98 @@
             <div class="flex-1 overflow-y-auto" id="frm-tab-content"></div>
         </div>
 
+        <!-- ===== NMS JIPD PAGE ===== -->
+        <div id="nms-jipd-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <!-- Top bar -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-network-wired text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-sm font-extrabold text-slate-800">NMS · Jaringan JIPD</h2>
+                    <p class="text-[9px] text-slate-400 font-medium">Monitoring & manajemen titik jaringan internet pemerintah Jawa Barat</p>
+                </div>
+                <span id="nms-last-refresh" class="text-[8px] text-slate-400 font-mono hidden"></span>
+                <button onclick="nmsRefresh()" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-sync-alt text-[8px]" id="nms-refresh-icon"></i>Refresh
+                </button>
+                <button onclick="nmsShowAddModal()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-extrabold px-3 py-2 rounded-xl transition-colors shadow-sm shadow-indigo-200">
+                    <i class="fas fa-plus text-[8px]"></i>Tambah Titik
+                </button>
+            </div>
+            <!-- Page tabs -->
+            <div class="shrink-0 bg-white border-b border-slate-200 px-4 flex items-center gap-0">
+                <button onclick="nmsTabSwitch('dashboard')" id="nms-tab-dashboard" class="nms-pg-tab active"><i class="fas fa-chart-bar mr-1.5"></i>Dashboard</button>
+                <button onclick="nmsTabSwitch('topology')" id="nms-tab-topology" class="nms-pg-tab"><i class="fas fa-project-diagram mr-1.5"></i>Topologi</button>
+            </div>
+            <!-- Dashboard tab content -->
+            <div id="nms-tab-dashboard-content" class="flex-1 flex flex-col overflow-hidden">
+            <!-- Summary cards -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 pb-4 pt-3">
+                <div class="grid grid-cols-3 gap-4" id="nms-summary"></div>
+            </div>
+            <!-- Body -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Left: titik list -->
+                <div class="flex-1 flex flex-col overflow-hidden border-r border-slate-100">
+                    <!-- Filter bar -->
+                    <div class="shrink-0 bg-white/90 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+                        <div class="flex gap-0.5 bg-slate-100 rounded-xl p-1 shrink-0">
+                            <button onclick="nmsFilter('all')"      id="nmsf-all"      class="nms-filter-btn active">Semua</button>
+                            <button onclick="nmsFilter('intra')"    id="nmsf-intra"    class="nms-filter-btn text-slate-500">Instansi</button>
+                            <button onclick="nmsFilter('pemprov')"  id="nmsf-pemprov"  class="nms-filter-btn text-slate-500">Provinsi</button>
+                            <button onclick="nmsFilter('kab_kota')" id="nmsf-kab_kota" class="nms-filter-btn text-slate-500">Kab/Kota</button>
+                            <button onclick="nmsFilter('down')"     id="nmsf-down"     class="nms-filter-btn text-slate-500">DOWN</button>
+                        </div>
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
+                            <input id="nms-search" type="text" placeholder="Cari nama, ISP, lokasi…" oninput="nmsRenderList()"
+                                class="w-full pl-8 pr-3 py-1.5 text-[10px] border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        </div>
+                        <span id="nms-count-badge" class="text-[9px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg whitespace-nowrap shrink-0"></span>
+                    </div>
+                    <!-- Table -->
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="w-full">
+                            <thead class="sticky top-0 z-10">
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-12">Status</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Nama Titik</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Kategori</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">ISP</th>
+                                    <th class="px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">BW Alloc</th>
+                                    <th id="nms-th-util" onclick="nmsSortBy('util')" class="nms-sort-th px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-32">Utilisasi <span id="nms-sort-util" class="ml-0.5 opacity-40">↕</span></th>
+                                    <th id="nms-th-peak" onclick="nmsSortBy('peak')" class="nms-sort-th px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Peak <span id="nms-sort-peak" class="ml-0.5 opacity-40">↕</span></th>
+                                    <th id="nms-th-avg" onclick="nmsSortBy('avg')" class="nms-sort-th px-4 py-2.5 text-left text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Avg <span id="nms-sort-avg" class="ml-0.5 opacity-40">↕</span></th>
+                                    <th class="px-4 py-2.5 text-right text-[8px] font-extrabold text-slate-400 uppercase tracking-widest w-20">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nms-titik-tbody" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Right: downtime sidebar -->
+                <div class="w-80 shrink-0 bg-white flex flex-col overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 shrink-0">
+                        <i class="fas fa-bolt text-amber-400 text-sm"></i>
+                        <p class="text-xs font-extrabold text-slate-800 flex-1">Log Gangguan Jaringan</p>
+                        <span id="nms-active-count" class="text-[9px] font-extrabold text-white bg-rose-500 px-2 py-0.5 rounded-full hidden"></span>
+                    </div>
+                    <div class="px-3 py-2 border-b border-slate-100 flex gap-1 bg-slate-50/80 shrink-0">
+                        <button onclick="nmsDtFilter('active')"   id="nmsd-active"   class="nmsd-btn text-[9px] font-extrabold px-2.5 py-1 rounded-lg bg-rose-500 text-white transition-all">Aktif</button>
+                        <button onclick="nmsDtFilter('resolved')" id="nmsd-resolved" class="nmsd-btn text-[9px] font-extrabold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-200 transition-all">Teratasi</button>
+                        <button onclick="nmsDtFilter('all')"      id="nmsd-all"      class="nmsd-btn text-[9px] font-extrabold px-2.5 py-1 rounded-lg text-slate-500 hover:bg-slate-200 transition-all">Semua</button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2" id="nms-downtime-list"></div>
+                </div>
+            </div>
+            </div><!-- /nms-tab-dashboard-content -->
+            <!-- Topology tab content -->
+            <div id="nms-tab-topology-content" class="flex-1 overflow-auto p-6 bg-slate-50/60" style="display:none">
+                <div id="nms-topology-container" class="w-full max-w-5xl mx-auto"></div>
+            </div>
+        </div>
+
     </main>
 
     <div id="project-overlay" onclick="closeProjectDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
@@ -2654,7 +2762,7 @@
             document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
 
             // Hide all custom pages first
-            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page'];
+            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page'];
             customPages.forEach(p => { const el2 = document.getElementById(p); if (el2) el2.style.display = 'none'; });
 
             if (pageId === 'dashboard') {
@@ -2678,6 +2786,12 @@
                 document.getElementById('content-container').style.display = 'none';
                 document.getElementById('default-page').style.display = 'none';
                 formulirGoMain();
+            } else if (pageId === 'mon-jipd') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('nms-jipd-page').style.display = 'flex';
+                if (!nmsInitialized) { nmsInit(); nmsInitialized = true; } else { nmsRenderAll(); }
             } else {
                 el.classList.add('active');
                 document.getElementById('content-container').style.display = 'none';
@@ -7747,6 +7861,709 @@
             const tempItem = { id:`${cfg.short}-DRAFT`, judul:'Dokumen Baru', status:'Draft', tgl:today, penyusun:'', info:{}, content:'' };
             frmOpenEditorWith(cat, tempItem, true);
         }
+
+    // =====================================================================
+    // ===== NMS JIPD ======================================================
+    // =====================================================================
+
+    let nmsTitik = [];
+    let nmsAllDowntime = [];
+    let nmsCurrentFilter = 'all';
+    let nmsDtCurrentFilter = 'active';
+    let nmsInitialized = false;
+    let nmsSortCol = null;   // 'util' | 'peak' | 'avg'
+    let nmsSortDir = 'desc'; // 'asc' | 'desc'
+    let nmsCurrentTab = 'dashboard';
+
+    const nmsCatCfg = {
+        intra:    { label:'Instansi',  bg:'bg-indigo-50', tx:'text-indigo-700', border:'border-indigo-100', icon:'fa-sitemap',        desc:'JIP, NAP & Link Dedicated',      cardBg:'bg-indigo-50/40 border-indigo-100' },
+        pemprov:  { label:'Provinsi',  bg:'bg-violet-50', tx:'text-violet-700', border:'border-violet-100', icon:'fa-building',        desc:'OPD & UPTD Prov. Jawa Barat',     cardBg:'bg-violet-50/40 border-violet-100' },
+        kab_kota: { label:'Kab/Kota',  bg:'bg-blue-50',   tx:'text-blue-700',   border:'border-blue-100',   icon:'fa-map-marker-alt',  desc:'27 Kab/Kota Jawa Barat',          cardBg:'bg-blue-50/40 border-blue-100' },
+    };
+
+    // ── Flatten all titik & downtime from nested jipd tree ──
+    function nmsInitData() {
+        nmsTitik = []; nmsAllDowntime = [];
+        function walk(node) {
+            const kat = node.kategori || 'intra';
+            (node.titik || []).forEach(t => nmsTitik.push({ ...t, kategori: kat, parent_nama: node.nama, parent_singkat: node.singkat || '' }));
+            (node.downtime || []).forEach(d => nmsAllDowntime.push({ ...d, parent_nama: node.nama, kategori: kat }));
+            (node.anak || []).forEach(c => walk(c));
+        }
+        (mockData.jipd || []).forEach(n => walk(n));
+        nmsAllDowntime.sort((a, b) => (a.resolved ? 1 : 0) - (b.resolved ? 1 : 0));
+    }
+
+    function nmsInit() {
+        nmsInitData();
+        nmsRenderAll();
+        const el = document.getElementById('nms-last-refresh');
+        if (el) { el.textContent = 'Diperbarui: ' + new Date().toLocaleTimeString('id-ID'); el.classList.remove('hidden'); }
+    }
+
+    function nmsRenderAll() {
+        nmsRenderSummary();
+        nmsRenderList();
+        nmsRenderDowntime();
+    }
+
+    function nmsRefresh() {
+        const icon = document.getElementById('nms-refresh-icon');
+        if (icon) { icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 700); }
+        nmsInit();
+    }
+
+    // ── Summary cards ──
+    function nmsRenderSummary() {
+        const cats = ['intra','pemprov','kab_kota'];
+        const html = cats.map(kat => {
+            const cfg   = nmsCatCfg[kat];
+            const titik = nmsTitik.filter(t => t.kategori === kat);
+            const total = titik.length;
+            const up    = titik.filter(t => t.status === 'UP').length;
+            const down  = titik.filter(t => t.status === 'DOWN').length;
+            const avgUtil = total ? Math.round(titik.reduce((s, t) => s + (t.bw_alloc ? t.bw_used / t.bw_alloc * 100 : 0), 0) / total) : 0;
+            const totalBw = titik.reduce((s, t) => s + (t.bw_alloc || 0), 0);
+            const bwLabel = totalBw >= 1000 ? (totalBw / 1000).toFixed(1) + ' Gbps' : totalBw + ' Mbps';
+            const barCls  = avgUtil > 80 ? 'bg-rose-500' : avgUtil > 60 ? 'bg-amber-400' : 'bg-emerald-500';
+            const utilTx  = avgUtil > 80 ? 'text-rose-600' : avgUtil > 60 ? 'text-amber-600' : 'text-emerald-600';
+            const hasDown = down > 0;
+            return `<div class="rounded-2xl border ${hasDown ? 'border-rose-200 bg-rose-50/20' : 'border-slate-100 bg-white'} p-4 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div class="w-8 h-8 ${cfg.bg} rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fas ${cfg.icon} ${cfg.tx} text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-extrabold text-slate-800">${kat === 'intra' ? 'Jaringan Instansi' : kat === 'pemprov' ? 'JIPD Provinsi' : 'JIPD Kab/Kota'}</p>
+                        <p class="text-[8px] text-slate-400">${cfg.desc}</p>
+                    </div>
+                    ${hasDown
+                        ? `<span class="text-[8px] font-extrabold text-rose-600 bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded-full shrink-0 nms-blink">${down} DOWN</span>`
+                        : `<span class="text-[8px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">All UP</span>`}
+                </div>
+                <div class="grid grid-cols-3 gap-1 mb-3 text-center">
+                    <div class="bg-slate-50 rounded-xl py-2"><p class="text-base font-extrabold text-slate-800">${total}</p><p class="text-[7px] font-bold text-slate-400 uppercase tracking-wider">Titik</p></div>
+                    <div class="bg-emerald-50 rounded-xl py-2"><p class="text-base font-extrabold text-emerald-600">${up}</p><p class="text-[7px] font-bold text-slate-400 uppercase tracking-wider">UP</p></div>
+                    <div class="${down > 0 ? 'bg-rose-50' : 'bg-slate-50'} rounded-xl py-2"><p class="text-base font-extrabold ${down > 0 ? 'text-rose-600' : 'text-slate-400'}">${down}</p><p class="text-[7px] font-bold text-slate-400 uppercase tracking-wider">DOWN</p></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1"><span class="text-[8px] font-bold text-slate-500">Utilisasi rata-rata</span><span class="text-[9px] font-extrabold ${utilTx}">${avgUtil}%</span></div>
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1"><div class="h-full ${barCls} rounded-full" style="width:${avgUtil}%"></div></div>
+                    <p class="text-[7px] text-slate-400">Total alokasi: ${bwLabel}</p>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('nms-summary').innerHTML = html;
+    }
+
+    // ── Tab switching ──
+    function nmsTabSwitch(tab) {
+        nmsCurrentTab = tab;
+        ['dashboard','topology'].forEach(t => {
+            const btn = document.getElementById('nms-tab-' + t);
+            const cnt = document.getElementById('nms-tab-' + t + '-content');
+            if (!btn || !cnt) return;
+            if (t === tab) { btn.classList.add('active'); cnt.style.display = ''; }
+            else           { btn.classList.remove('active'); cnt.style.display = 'none'; }
+        });
+        if (tab === 'topology') nmsRenderTopology();
+    }
+
+    // ── Topology diagram ──
+    function nmsRenderTopology() {
+        const container = document.getElementById('nms-topology-container');
+        if (!container) return;
+
+        // Gather key titik from nmsTitik
+        function getTitik(id) { return nmsTitik.find(t => t.id === id) || {}; }
+        function utilPct(t)   { return t.bw_alloc ? Math.round((t.bw_used || 0) / t.bw_alloc * 100) : 0; }
+        function linkColor(pct) { return pct > 80 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#22c55e'; }
+        function bwLabel(mbps) { return mbps >= 1000 ? (mbps / 1000).toFixed(mbps % 1000 === 0 ? 0 : 1) + 'G' : mbps + 'M'; }
+
+        const nap1 = getTitik('t204a'); const nap1u = utilPct(nap1);
+        const nap2 = getTitik('t205a'); const nap2u = utilPct(nap2);
+        const pdn  = getTitik('t201a'); const pdnu  = utilPct(pdn);
+        const drc  = getTitik('t203a'); const drcu  = utilPct(drc);
+        const bjb  = getTitik('t202a'); const bjbu  = utilPct(bjb);
+
+        // Kab/Kota summary by first letter groups
+        const kabKota = nmsTitik.filter(t => t.kategori === 'kab_kota');
+        const pemprov = nmsTitik.filter(t => t.kategori === 'pemprov');
+        const kkUp   = kabKota.filter(t => t.status === 'UP').length;
+        const kkDown = kabKota.filter(t => t.status === 'DOWN').length;
+        const ppUp   = pemprov.filter(t => t.status === 'UP').length;
+        const ppDown = pemprov.filter(t => t.status === 'DOWN').length;
+        const kkAvgUtil = kabKota.length ? Math.round(kabKota.reduce((s, t) => s + utilPct(t), 0) / kabKota.length) : 0;
+        const ppAvgUtil = pemprov.length ? Math.round(pemprov.reduce((s, t) => s + utilPct(t), 0) / pemprov.length) : 0;
+
+        function nodeBox(x, y, w, h, rx, fill, stroke, content) {
+            return `<g transform="translate(${x},${y})">
+                <rect width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+                ${content}
+            </g>`;
+        }
+        function utilBar(x, y, w, pct, col) {
+            return `<rect x="${x}" y="${y}" width="${w}" height="4" rx="2" fill="#e2e8f0"/>
+                    <rect x="${x}" y="${y}" width="${Math.round(w * pct / 100)}" height="4" rx="2" fill="${col}"/>`;
+        }
+        function linkPath(x1,y1,x2,y2,col,label,lx,ly) {
+            const mx = (x1+x2)/2, my = (y1+y2)/2;
+            return `<path d="M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+                    ${label ? `<text x="${lx||mx+6}" y="${ly||my}" font-size="8" fill="${col}" font-weight="700" font-family="monospace">${label}</text>` : ''}`;
+        }
+
+        // Layout constants
+        const W = 860, H = 620;
+        // Internet: (430, 45) / NAP-01: (220, 145) / NAP-02: (640, 145)
+        // Core Hub: (430, 265) / PDN: (100, 385) / DRC: (280, 385) / BJB: (460, 385) / JIPD-Prov: (640, 385)
+        // Kab/Kota cluster: (430, 510)
+
+        let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="w-full" style="font-family:Inter,system-ui,sans-serif">
+        <defs>
+            <filter id="topo-shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".12"/></filter>
+            <marker id="arr-g" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#22c55e"/></marker>
+            <marker id="arr-y" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f59e0b"/></marker>
+            <marker id="arr-r" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/></marker>
+        </defs>
+        <!-- Background grid -->
+        <rect width="${W}" height="${H}" fill="#f8fafc" rx="16"/>
+        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30,0 L0,0 0,30" fill="none" stroke="#e2e8f0" stroke-width=".5"/></pattern>
+        <rect width="${W}" height="${H}" fill="url(#grid)" rx="16" opacity=".5"/>`;
+
+        // ── LINKS ──
+        // Internet → NAP-01
+        svg += linkPath(430,68, 220,138, linkColor(nap1u), null);
+        // Internet → NAP-02
+        svg += linkPath(430,68, 640,138, linkColor(nap2u), null);
+        // NAP-01 → Core Hub
+        svg += linkPath(220,185, 370,255, linkColor(nap1u), `${nap1u}%`, 262, 218);
+        // NAP-02 → Core Hub
+        svg += linkPath(640,185, 490,255, linkColor(nap2u), `${nap2u}%`, 548, 218);
+        // Core Hub → PDN
+        svg += linkPath(390,295, 140,378, linkColor(pdnu), `${pdnu}%`, 238, 328);
+        // Core Hub → DRC
+        svg += linkPath(415,295, 320,378, linkColor(drcu), `${drcu}%`, 344, 330);
+        // Core Hub → BJB
+        svg += linkPath(450,295, 500,378, linkColor(bjbu), `${bjbu}%`, 484, 330);
+        // Core Hub → JIPD Prov
+        svg += linkPath(480,295, 640,378, linkColor(ppAvgUtil), `${ppAvgUtil}%`, 572, 328);
+        // JIPD Prov → Kab/Kota
+        svg += linkPath(660,428, 540,498, linkColor(kkAvgUtil), null);
+        svg += linkPath(640,428, 430,498, linkColor(kkAvgUtil), null);
+        svg += linkPath(680,428, 650,498, linkColor(kkAvgUtil), null);
+
+        // ── INTERNET CLOUD ──
+        svg += `<g transform="translate(340,18)" filter="url(#topo-shadow)">
+            <ellipse cx="90" cy="26" rx="75" ry="22" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+            <ellipse cx="60" cy="30" rx="55" ry="18" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+            <ellipse cx="120" cy="30" rx="55" ry="18" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+            <ellipse cx="90" cy="35" rx="80" ry="20" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+            <text x="90" y="36" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8">INTERNET</text>
+        </g>`;
+
+        // ── NAP NODES ──
+        const napW = 140, napH = 68;
+        // NAP-01
+        const n1c = linkColor(nap1u);
+        svg += `<g transform="translate(${220 - napW/2},138)" filter="url(#topo-shadow)" class="topo-node" onclick="nmsOpenDetail('t204a')">
+            <rect width="${napW}" height="${napH}" rx="12" fill="white" stroke="${n1c}" stroke-width="2"/>
+            <rect width="${napW}" height="22" rx="12" fill="${nap1.status==='DOWN'?'#fef2f2':'#eef2ff'}" stroke="none"/>
+            <rect width="${napW}" height="11" rx="0" y="11" fill="${nap1.status==='DOWN'?'#fef2f2':'#eef2ff'}" stroke="none"/>
+            <text x="70" y="14" text-anchor="middle" font-size="8" font-weight="800" fill="#4f46e5">NAP-01 · BDCN</text>
+            <text x="10" y="30" font-size="7.5" fill="#64748b">BW: ${nap1.bw_alloc ? bwLabel(nap1.bw_alloc)+'bps' : '—'}</text>
+            ${utilBar(10, 36, napW-20, nap1u, n1c)}
+            <text x="${napW-10}" y="34" text-anchor="end" font-size="8" font-weight="700" fill="${n1c}">${nap1u}%</text>
+            <text x="10" y="56" font-size="7" fill="#94a3b8">${nap1.isp || ''}</text>
+            <circle cx="${napW-12}" cy="56" r="4" fill="${nap1.status==='UP'?'#22c55e':'#ef4444'}"/>
+        </g>`;
+        // NAP-02
+        const n2c = linkColor(nap2u);
+        svg += `<g transform="translate(${640 - napW/2},138)" filter="url(#topo-shadow)" class="topo-node" onclick="nmsOpenDetail('t205a')">
+            <rect width="${napW}" height="${napH}" rx="12" fill="white" stroke="${n2c}" stroke-width="2"/>
+            <rect width="${napW}" height="22" rx="12" fill="${nap2.status==='DOWN'?'#fef2f2':'#eef2ff'}" stroke="none"/>
+            <rect width="${napW}" height="11" rx="0" y="11" fill="${nap2.status==='DOWN'?'#fef2f2':'#eef2ff'}" stroke="none"/>
+            <text x="70" y="14" text-anchor="middle" font-size="8" font-weight="800" fill="#4f46e5">NAP-02 · Astinet</text>
+            <text x="10" y="30" font-size="7.5" fill="#64748b">BW: ${nap2.bw_alloc ? bwLabel(nap2.bw_alloc)+'bps' : '—'}</text>
+            ${utilBar(10, 36, napW-20, nap2u, n2c)}
+            <text x="${napW-10}" y="34" text-anchor="end" font-size="8" font-weight="700" fill="${n2c}">${nap2u}%</text>
+            <text x="10" y="56" font-size="7" fill="#94a3b8">${nap2.isp || ''}</text>
+            <circle cx="${napW-12}" cy="56" r="4" fill="${nap2.status==='UP'?'#22c55e':'#ef4444'}"/>
+        </g>`;
+
+        // ── CORE HUB (Gedung Sate) ──
+        svg += `<g transform="translate(340,248)" filter="url(#topo-shadow)">
+            <rect width="180" height="56" rx="14" fill="#4f46e5" stroke="#4338ca" stroke-width="1.5"/>
+            <text x="90" y="20" text-anchor="middle" font-size="9" font-weight="800" fill="white" letter-spacing=".5">CORE HUB</text>
+            <text x="90" y="33" text-anchor="middle" font-size="8" fill="#c7d2fe">Gedung Sate, Bandung</text>
+            <text x="90" y="46" text-anchor="middle" font-size="7" fill="#a5b4fc">Pusat Distribusi JIPD Jabar</text>
+        </g>`;
+
+        // ── JIP LINK NODES (PDN, DRC, BJB) ──
+        const jipW = 110, jipH = 56;
+        function jipNode(x, y, label, isp, titik, util_pct) {
+            const c = linkColor(util_pct);
+            const isDown = titik.status === 'DOWN';
+            return `<g transform="translate(${x - jipW/2},${y})" filter="url(#topo-shadow)" class="topo-node" onclick="nmsOpenDetail('${titik.id||''}')">
+                <rect width="${jipW}" height="${jipH}" rx="10" fill="white" stroke="${c}" stroke-width="1.5"/>
+                <rect width="${jipW}" height="18" rx="10" fill="${isDown?'#fef2f2':'#f0fdf4'}" stroke="none"/>
+                <rect width="${jipW}" height="8" rx="0" y="10" fill="${isDown?'#fef2f2':'#f0fdf4'}" stroke="none"/>
+                <text x="${jipW/2}" y="12" text-anchor="middle" font-size="8" font-weight="800" fill="${isDown?'#dc2626':'#15803d'}">${label}</text>
+                <text x="8" y="27" font-size="7" fill="#64748b">BW: ${titik.bw_alloc ? bwLabel(titik.bw_alloc)+'bps' : '—'}</text>
+                ${utilBar(8, 32, jipW-16, util_pct, c)}
+                <text x="${jipW-8}" y="30" text-anchor="end" font-size="7.5" font-weight="700" fill="${c}">${util_pct}%</text>
+                <text x="8" y="50" font-size="6.5" fill="#94a3b8">${isp||''}</text>
+                <circle cx="${jipW-10}" cy="48" r="3.5" fill="${isDown?'#ef4444':'#22c55e'}"/>
+            </g>`;
+        }
+        svg += jipNode(100, 378, 'PDN Cikarang', pdn.isp||'', pdn, pdnu);
+        svg += jipNode(300, 378, 'DRC Cimahi',   drc.isp||'', drc, drcu);
+        svg += jipNode(490, 378, 'BJB Bandung',  bjb.isp||'', bjb, bjbu);
+
+        // ── JIPD PROVINSI cluster ──
+        const ppColor = linkColor(ppAvgUtil);
+        svg += `<g transform="translate(570,375)" filter="url(#topo-shadow)">
+            <rect width="140" height="60" rx="12" fill="white" stroke="${ppColor}" stroke-width="1.5"/>
+            <rect width="140" height="20" rx="12" fill="#f5f3ff" stroke="none"/>
+            <rect width="140" height="9" rx="0" y="11" fill="#f5f3ff" stroke="none"/>
+            <text x="70" y="13" text-anchor="middle" font-size="8" font-weight="800" fill="#7c3aed">JIPD Provinsi</text>
+            <text x="10" y="30" font-size="7.5" fill="#64748b">${pemprov.length} OPD/UPTD</text>
+            ${utilBar(10, 36, 120, ppAvgUtil, ppColor)}
+            <text x="130" y="34" text-anchor="end" font-size="8" font-weight="700" fill="${ppColor}">${ppAvgUtil}%</text>
+            <text x="10" y="54" font-size="7" fill="${ppDown>0?'#dc2626':'#16a34a'}">${ppUp} UP${ppDown>0?' · '+ppDown+' DOWN':''}</text>
+        </g>`;
+
+        // ── KAB/KOTA cluster ──
+        const kkColor = linkColor(kkAvgUtil);
+        svg += `<g transform="translate(250,490)" filter="url(#topo-shadow)">
+            <rect width="360" height="72" rx="14" fill="white" stroke="${kkColor}" stroke-width="1.5"/>
+            <rect width="360" height="22" rx="14" fill="#eff6ff" stroke="none"/>
+            <rect width="360" height="10" rx="0" y="12" fill="#eff6ff" stroke="none"/>
+            <text x="180" y="15" text-anchor="middle" font-size="8" font-weight="800" fill="#1d4ed8">JIPD Kab/Kota · 27 Wilayah Jawa Barat</text>
+            <text x="14" y="34" font-size="7.5" fill="#64748b">${kabKota.length} titik jaringan</text>
+            ${utilBar(14, 40, 332, kkAvgUtil, kkColor)}
+            <text x="346" y="38" text-anchor="end" font-size="8" font-weight="700" fill="${kkColor}">${kkAvgUtil}% avg util</text>
+            <text x="14" y="60" font-size="7" fill="${kkDown>0?'#dc2626':'#16a34a'}">${kkUp} UP${kkDown>0?' · '+kkDown+' DOWN':''}</text>
+            <text x="346" y="60" text-anchor="end" font-size="7" fill="#94a3b8">Total BW: ${bwLabel(kabKota.reduce((s,t)=>s+(t.bw_alloc||0),0))}bps</text>
+        </g>`;
+
+        // ── LEGEND ──
+        svg += `<g transform="translate(14,${H-44})">
+            <rect width="260" height="36" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+            <text x="10" y="12" font-size="7.5" font-weight="800" fill="#64748b" text-transform="uppercase">UTILISASI LINK</text>
+            <rect x="10"  y="18" width="12" height="5" rx="2" fill="#22c55e"/>
+            <text x="26"  y="24" font-size="7" fill="#64748b">Normal (&lt;60%)</text>
+            <rect x="98"  y="18" width="12" height="5" rx="2" fill="#f59e0b"/>
+            <text x="114" y="24" font-size="7" fill="#64748b">Tinggi (60–80%)</text>
+            <rect x="194" y="18" width="12" height="5" rx="2" fill="#ef4444"/>
+            <text x="210" y="24" font-size="7" fill="#64748b">Kritis (&gt;80%)</text>
+        </g>`;
+
+        // ── LAYER LABELS ──
+        svg += `<text x="8" y="55"  font-size="7" font-weight="800" fill="#94a3b8" letter-spacing="1.5" transform="rotate(-90,8,55)" text-anchor="end">UPSTREAM</text>`;
+        svg += `<text x="8" y="175" font-size="7" font-weight="800" fill="#94a3b8" letter-spacing="1.5" transform="rotate(-90,8,175)" text-anchor="end">NAP</text>`;
+        svg += `<text x="8" y="295" font-size="7" font-weight="800" fill="#94a3b8" letter-spacing="1.5" transform="rotate(-90,8,295)" text-anchor="end">CORE</text>`;
+        svg += `<text x="8" y="415" font-size="7" font-weight="800" fill="#94a3b8" letter-spacing="1.5" transform="rotate(-90,8,415)" text-anchor="end">JIP/OPD</text>`;
+        svg += `<text x="8" y="545" font-size="7" font-weight="800" fill="#94a3b8" letter-spacing="1.5" transform="rotate(-90,8,545)" text-anchor="end">KAB/KOTA</text>`;
+
+        svg += `</svg>`;
+
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-indigo-500 text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-extrabold text-slate-800">Topologi Jaringan JIPD</p>
+                        <p class="text-[9px] text-slate-400">Keterhubungan titik jaringan ke NAP — warna menunjukkan utilisasi link</p>
+                    </div>
+                    <span class="text-[8px] text-slate-400 font-mono">Klik node untuk detail</span>
+                </div>
+                <div class="p-4">${svg}</div>
+            </div>`;
+    }
+
+    // ── Titik list ──
+    function nmsFilter(f) {
+        nmsCurrentFilter = f;
+        ['all','intra','pemprov','kab_kota','down'].forEach(k => {
+            const b = document.getElementById('nmsf-' + k);
+            if (!b) return;
+            if (k === f) { b.classList.add('active'); b.classList.remove('text-slate-500'); }
+            else         { b.classList.remove('active'); b.classList.add('text-slate-500'); }
+        });
+        nmsRenderList();
+    }
+
+    function nmsGetFiltered() {
+        const q = (document.getElementById('nms-search')?.value || '').toLowerCase();
+        let rows = nmsTitik.filter(t => {
+            if (nmsCurrentFilter === 'down'     && t.status   !== 'DOWN')      return false;
+            if (nmsCurrentFilter === 'intra'    && t.kategori !== 'intra')     return false;
+            if (nmsCurrentFilter === 'pemprov'  && t.kategori !== 'pemprov')   return false;
+            if (nmsCurrentFilter === 'kab_kota' && t.kategori !== 'kab_kota')  return false;
+            if (q && ![t.nama, t.isp, t.alamat, t.parent_nama].join(' ').toLowerCase().includes(q)) return false;
+            return true;
+        });
+        if (nmsSortCol) {
+            rows = [...rows].sort((a, b) => {
+                let va, vb;
+                if (nmsSortCol === 'util') {
+                    va = a.bw_alloc ? a.bw_used / a.bw_alloc : 0;
+                    vb = b.bw_alloc ? b.bw_used / b.bw_alloc : 0;
+                } else if (nmsSortCol === 'peak') {
+                    va = a.bw_peak || 0; vb = b.bw_peak || 0;
+                } else {
+                    va = a.bw_avg  || 0; vb = b.bw_avg  || 0;
+                }
+                return nmsSortDir === 'asc' ? va - vb : vb - va;
+            });
+        }
+        return rows;
+    }
+
+    function nmsSortBy(col) {
+        if (nmsSortCol === col) { nmsSortDir = nmsSortDir === 'asc' ? 'desc' : 'asc'; }
+        else { nmsSortCol = col; nmsSortDir = 'desc'; }
+        // Update header indicators
+        ['util','peak','avg'].forEach(c => {
+            const el = document.getElementById('nms-sort-' + c);
+            if (!el) return;
+            if (c === nmsSortCol) { el.textContent = nmsSortDir === 'asc' ? '↑' : '↓'; el.classList.remove('opacity-40'); el.style.color = '#4f46e5'; }
+            else { el.textContent = '↕'; el.classList.add('opacity-40'); el.style.color = ''; }
+        });
+        ['util','peak','avg'].forEach(c => {
+            const th = document.getElementById('nms-th-' + c);
+            if (!th) return;
+            if (c === nmsSortCol) th.classList.add('text-indigo-600');
+            else th.classList.remove('text-indigo-600');
+        });
+        nmsRenderList();
+    }
+
+    function nmsRenderList() {
+        const rows  = nmsGetFiltered();
+        const badge = document.getElementById('nms-count-badge');
+        if (badge) badge.textContent = rows.length + ' titik';
+        const tbody = document.getElementById('nms-titik-tbody');
+        if (!tbody) return;
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="9" class="px-4 py-12 text-center"><i class="fas fa-search text-3xl text-slate-200 block mb-3"></i><p class="text-xs font-bold text-slate-400">Tidak ada titik sesuai filter</p></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = rows.map(t => {
+            const util    = t.bw_alloc ? Math.round(t.bw_used / t.bw_alloc * 100) : 0;
+            const peakPct = t.bw_alloc ? Math.round((t.bw_peak || 0) / t.bw_alloc * 100) : 0;
+            const barCls  = util > 80 ? 'bg-rose-500' : util > 60 ? 'bg-amber-400' : 'bg-emerald-500';
+            const utilTx  = util > 80 ? 'text-rose-600' : util > 60 ? 'text-amber-500' : 'text-emerald-600';
+            const peakTx  = peakPct > 80 ? 'text-rose-600' : peakPct > 60 ? 'text-amber-500' : 'text-slate-600';
+            const cfg     = nmsCatCfg[t.kategori] || nmsCatCfg.intra;
+            const dotCls  = t.status === 'UP' ? 'bg-emerald-500' : t.status === 'DOWN' ? 'bg-rose-500 nms-blink' : 'bg-amber-400';
+            const stTx    = t.status === 'UP' ? 'text-emerald-600' : t.status === 'DOWN' ? 'text-rose-600' : 'text-amber-600';
+            const bwLbl   = t.bw_alloc >= 1000 ? (t.bw_alloc / 1000) + 'G' : t.bw_alloc + 'M';
+            const peakLbl = (t.bw_peak || 0) >= 1000 ? ((t.bw_peak || 0) / 1000).toFixed(1) + 'G' : (t.bw_peak || 0) + 'M';
+            const avgLbl  = (t.bw_avg  || 0) >= 1000 ? ((t.bw_avg  || 0) / 1000).toFixed(1) + 'G' : (t.bw_avg  || 0) + 'M';
+            const rowBg   = t.status === 'DOWN' ? 'bg-rose-50/40' : '';
+            return `<tr class="nms-row border-b border-slate-50 last:border-0 ${rowBg}" onclick="nmsOpenDetail('${t.id}')">
+                <td class="px-4 py-3">
+                    <div class="flex flex-col items-center gap-0.5">
+                        <div class="w-2.5 h-2.5 rounded-full ${dotCls}"></div>
+                        <span class="text-[7px] font-extrabold ${stTx}">${t.status}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[10px] font-bold text-slate-800 leading-tight">${t.nama}</p>
+                    <p class="text-[8px] text-slate-400 truncate max-w-[200px]">${t.parent_nama}</p>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="text-[8px] font-extrabold ${cfg.tx} ${cfg.bg} border ${cfg.border} px-2 py-0.5 rounded-lg">${cfg.label}</span>
+                </td>
+                <td class="px-4 py-3"><p class="text-[9px] font-bold text-slate-600">${t.isp || '—'}</p></td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-extrabold text-slate-700">${bwLbl}bps</p>
+                    <p class="text-[7px] text-slate-400">${t.bw_used || 0} Mbps used</p>
+                </td>
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-1.5">
+                        <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full ${barCls} rounded-full" style="width:${util}%"></div>
+                        </div>
+                        <span class="text-[8px] font-extrabold ${utilTx} w-7 text-right shrink-0">${util}%</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-extrabold ${peakTx}">${peakLbl}bps</p>
+                    <p class="text-[7px] text-slate-400">${peakPct}% alloc</p>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[9px] font-extrabold text-slate-600">${avgLbl}bps</p>
+                </td>
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-1 justify-end">
+                        <button onclick="event.stopPropagation();nmsShowEditModal('${t.id}')" title="Edit"
+                            class="w-7 h-7 flex items-center justify-center text-slate-500 bg-slate-50 hover:bg-amber-50 hover:text-amber-600 border border-slate-200 hover:border-amber-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-pen"></i></button>
+                        <button onclick="event.stopPropagation();nmsConfirmDelete('${t.id}')" title="Hapus"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-lg transition-colors text-[9px]">
+                            <i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Downtime log ──
+    function nmsDtFilter(f) {
+        nmsDtCurrentFilter = f;
+        document.querySelectorAll('.nmsd-btn').forEach(b => {
+            b.className = 'nmsd-btn text-[9px] font-extrabold px-2.5 py-1 rounded-lg transition-all text-slate-500 hover:bg-slate-200';
+        });
+        const active = document.getElementById('nmsd-' + f);
+        if (active) active.className = 'nmsd-btn text-[9px] font-extrabold px-2.5 py-1 rounded-lg transition-all '
+            + (f === 'active' ? 'bg-rose-500 text-white' : f === 'resolved' ? 'bg-emerald-600 text-white' : 'bg-indigo-500 text-white');
+        nmsRenderDowntime();
+    }
+
+    function nmsRenderDowntime() {
+        const f = nmsDtCurrentFilter;
+        const items = nmsAllDowntime.filter(d => f === 'all' ? true : f === 'active' ? !d.resolved : d.resolved);
+        const activeCount = nmsAllDowntime.filter(d => !d.resolved).length;
+        const badge = document.getElementById('nms-active-count');
+        if (badge) { badge.textContent = activeCount + ' aktif'; badge.classList.toggle('hidden', activeCount === 0); }
+        const el = document.getElementById('nms-downtime-list');
+        if (!el) return;
+        if (!items.length) {
+            el.innerHTML = `<div class="flex flex-col items-center py-10 text-slate-300">
+                <i class="fas fa-check-circle text-3xl mb-2 ${f === 'active' ? 'text-emerald-400' : 'text-slate-300'}"></i>
+                <p class="text-[9px] font-bold text-slate-400">${f === 'active' ? 'Tidak ada gangguan aktif' : 'Tidak ada data'}</p>
+            </div>`;
+            return;
+        }
+        el.innerHTML = items.map(d => {
+            const dur = d.durasi_menit
+                ? (d.durasi_menit >= 60 ? Math.floor(d.durasi_menit / 60) + 'j ' + (d.durasi_menit % 60) + 'm' : d.durasi_menit + ' menit')
+                : 'Sedang berlangsung';
+            return `<div class="rounded-xl border p-3 ${d.resolved ? 'border-slate-100 bg-white' : 'border-rose-200 bg-rose-50/40'}">
+                <div class="flex items-start gap-2 mb-1.5">
+                    <div class="w-2 h-2 rounded-full mt-1.5 shrink-0 ${d.resolved ? 'bg-slate-400' : 'bg-rose-500 nms-blink'}"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[9px] font-extrabold text-slate-800 leading-tight">${d.titik}</p>
+                        <p class="text-[8px] text-slate-400 truncate">${d.parent_nama || ''}</p>
+                    </div>
+                    <span class="text-[7px] font-extrabold border px-1.5 py-0.5 rounded-full shrink-0 ${d.resolved ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-rose-100 text-rose-600 border-rose-200'}">${d.resolved ? 'Resolved' : 'AKTIF'}</span>
+                </div>
+                <div class="ml-4 space-y-0.5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[8px] text-slate-500"><i class="fas fa-clock text-[7px] mr-0.5"></i>${d.waktu_mulai}</span>
+                        <span class="text-[8px] font-extrabold ${d.resolved ? 'text-slate-500' : 'text-rose-600'}">${dur}</span>
+                    </div>
+                    <p class="text-[8px] text-slate-600 leading-relaxed line-clamp-2">${d.penyebab}</p>
+                    ${d.inc_no ? `<span class="text-[8px] font-extrabold text-indigo-500">${d.inc_no}</span>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Detail modal ──
+    function nmsOpenDetail(tid) {
+        const t = nmsTitik.find(x => x.id === tid);
+        if (!t) return;
+        const cfg    = nmsCatCfg[t.kategori] || nmsCatCfg.intra;
+        const util   = t.bw_alloc ? Math.round(t.bw_used / t.bw_alloc * 100) : 0;
+        const barCls = util > 80 ? 'bg-rose-500' : util > 60 ? 'bg-amber-400' : 'bg-emerald-500';
+        const dotClr = t.status === 'UP' ? '#10b981' : t.status === 'DOWN' ? '#ef4444' : '#f59e0b';
+        const stCls  = t.status === 'UP' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                     : t.status === 'DOWN' ? 'bg-rose-50 text-rose-700 border-rose-200'
+                     : 'bg-amber-50 text-amber-700 border-amber-200';
+        const bwLbl  = t.bw_alloc >= 1000 ? (t.bw_alloc / 1000) + ' Gbps' : (t.bw_alloc || 0) + ' Mbps';
+        nmsModal(`
+            <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full shrink-0 ${t.status === 'DOWN' ? 'nms-blink' : ''}" style="background:${dotClr}"></div>
+                <div class="flex-1 min-w-0"><p class="text-sm font-extrabold text-slate-800 truncate">${t.nama}</p><p class="text-[9px] text-slate-400 truncate">${t.parent_nama}</p></div>
+                <span class="text-[8px] font-extrabold border px-2 py-0.5 rounded-full ${stCls}">${t.status}</span>
+                <button onclick="nmsCloseModal()" class="text-slate-400 hover:text-slate-600 shrink-0"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                    ${[['Kategori',`<span class="text-[9px] font-extrabold ${cfg.tx} ${cfg.bg} border ${cfg.border} px-2 py-0.5 rounded-lg">${cfg.label}</span>`],
+                       ['ISP / Provider', t.isp||'—'],
+                       ['Alamat', t.alamat||'—'],
+                       ['BW Alokasi', bwLbl],
+                    ].map(([l,v])=>`<div class="bg-slate-50 rounded-xl p-3 border border-slate-100"><p class="text-[7px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">${l}</p><p class="text-[10px] font-bold text-slate-700">${v}</p></div>`).join('')}
+                </div>
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p class="text-[7px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Utilisasi Bandwidth</p>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${barCls} rounded-full" style="width:${util}%"></div></div>
+                        <span class="text-sm font-extrabold ${barCls.replace('bg-','text-')}">${util}%</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        ${[['Saat Ini',(t.bw_used||0)+' Mbps'],['Puncak',(t.bw_peak||0)+' Mbps'],['Rata-rata',(t.bw_avg||0)+' Mbps']]
+                          .map(([l,v])=>`<div><p class="text-xs font-extrabold text-slate-700">${v}</p><p class="text-[7px] text-slate-400">${l}</p></div>`).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2">
+                <button onclick="nmsCloseModal();nmsShowEditModal('${t.id}')" class="flex-1 py-2.5 text-xs font-extrabold text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-2xl transition-colors"><i class="fas fa-pen mr-1"></i>Edit</button>
+                <button onclick="nmsCloseModal();nmsConfirmDelete('${t.id}')" class="px-4 py-2.5 text-xs font-extrabold text-rose-500 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-2xl transition-colors"><i class="fas fa-trash"></i></button>
+            </div>`);
+    }
+
+    // ── Add / Edit modal ──
+    function nmsShowAddModal()        { nmsShowManageModal(null); }
+    function nmsShowEditModal(tid)    { nmsShowManageModal(tid); }
+
+    function nmsShowManageModal(tid) {
+        const isEdit = tid !== null;
+        const t = isEdit ? nmsTitik.find(x => x.id === tid) : null;
+        const isps = [...new Set(nmsTitik.map(x => x.isp).filter(Boolean))].sort();
+        const catOpts    = ['intra','pemprov','kab_kota'].map(k => `<option value="${k}" ${t?.kategori===k?'selected':''}>${nmsCatCfg[k].label === 'Instansi' ? 'Jaringan Instansi' : k==='pemprov' ? 'JIPD Provinsi' : 'JIPD Kab/Kota'}</option>`).join('');
+        const statusOpts = ['UP','DOWN','DEGRADED'].map(s => `<option value="${s}" ${(t?.status||'UP')===s?'selected':''}>${s}</option>`).join('');
+        nmsModal(`
+            <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-9 h-9 ${isEdit?'bg-amber-50':'bg-indigo-50'} rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas ${isEdit?'fa-pen text-amber-500':'fa-plus text-indigo-500'}"></i>
+                </div>
+                <div class="flex-1"><p class="text-sm font-extrabold text-slate-800">${isEdit?'Edit':'Tambah'} Titik Jaringan</p><p class="text-[9px] text-slate-400">${isEdit?t.nama:'Masukkan data titik baru'}</p></div>
+                <button onclick="nmsCloseModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-5 py-4 space-y-3">
+                <div>
+                    <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">Nama Titik *</label>
+                    <input id="nms-f-nama" value="${t?.nama||''}" placeholder="cth. Gedung Dinkes Jabar"
+                        class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                </div>
+                <div>
+                    <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">Nama Institusi / Parent</label>
+                    <input id="nms-f-parent" value="${t?.parent_nama||''}" placeholder="cth. Dinas Kesehatan Jabar"
+                        class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">Kategori</label>
+                        <select id="nms-f-kat" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">${catOpts}</select>
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">Status</label>
+                        <select id="nms-f-status" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">${statusOpts}</select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">Alamat / Lokasi</label>
+                    <input id="nms-f-alamat" value="${t?.alamat||''}" placeholder="cth. Jl. Pasteur No. 25, Bandung"
+                        class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">ISP / Provider</label>
+                        <input id="nms-f-isp" value="${t?.isp||''}" list="nms-isp-dl" placeholder="cth. BDCN Fiber"
+                            class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                        <datalist id="nms-isp-dl">${isps.map(i=>`<option value="${i}">`).join('')}</datalist>
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">BW Alokasi (Mbps)</label>
+                        <input id="nms-f-bw" type="number" min="0" value="${t?.bw_alloc||''}" placeholder="cth. 100"
+                            class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">BW Terpakai (Mbps)</label>
+                        <input id="nms-f-bw-used" type="number" min="0" value="${t?.bw_used||''}" placeholder="cth. 67"
+                            class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mb-1 block">BW Peak (Mbps)</label>
+                        <input id="nms-f-bw-peak" type="number" min="0" value="${t?.bw_peak||''}" placeholder="cth. 82"
+                            class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50">
+                    </div>
+                </div>
+            </div>
+            <div class="px-5 pb-5 flex gap-2">
+                <button onclick="nmsCloseModal()" class="flex-1 py-2.5 text-xs font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors">Batal</button>
+                <button onclick="nmsSaveTitik(${isEdit?`'${tid}'`:'null'})"
+                    class="flex-1 py-2.5 text-xs font-extrabold text-white ${isEdit?'bg-amber-500 hover:bg-amber-600':'bg-indigo-600 hover:bg-indigo-700'} rounded-2xl transition-colors shadow-sm">
+                    <i class="fas ${isEdit?'fa-save':'fa-plus'} mr-1.5 text-[9px]"></i>${isEdit?'Simpan':'Tambah Titik'}
+                </button>
+            </div>`);
+    }
+
+    function nmsSaveTitik(tid) {
+        const nama = document.getElementById('nms-f-nama')?.value?.trim();
+        if (!nama) { document.getElementById('nms-f-nama')?.focus(); return; }
+        const data = {
+            nama,
+            parent_nama:   document.getElementById('nms-f-parent')?.value?.trim() || '',
+            parent_singkat:'',
+            kategori:      document.getElementById('nms-f-kat')?.value || 'intra',
+            status:        document.getElementById('nms-f-status')?.value || 'UP',
+            alamat:        document.getElementById('nms-f-alamat')?.value?.trim() || '',
+            isp:           document.getElementById('nms-f-isp')?.value?.trim() || '',
+            bw_alloc:      parseInt(document.getElementById('nms-f-bw')?.value) || 0,
+            bw_used:       parseInt(document.getElementById('nms-f-bw-used')?.value) || 0,
+            bw_peak:       parseInt(document.getElementById('nms-f-bw-peak')?.value) || 0,
+        };
+        if (tid) {
+            const t = nmsTitik.find(x => x.id === tid);
+            if (t) Object.assign(t, data);
+        } else {
+            nmsTitik.push({ ...data, id: 'nms-' + Date.now(), bw_avg: data.bw_used, _custom: true });
+        }
+        nmsCloseModal();
+        nmsRenderSummary();
+        nmsRenderList();
+        frmToast(tid ? 'Titik diperbarui' : 'Titik berhasil ditambahkan', tid ? '#f59e0b' : '#4f46e5');
+    }
+
+    function nmsConfirmDelete(tid) {
+        const t = nmsTitik.find(x => x.id === tid);
+        if (!t) return;
+        nmsModal(`
+            <div class="p-8 text-center">
+                <div class="w-14 h-14 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                    <i class="fas fa-trash text-rose-500 text-xl"></i>
+                </div>
+                <p class="text-sm font-extrabold text-slate-800 mb-1">Hapus Titik Jaringan?</p>
+                <p class="text-[10px] text-slate-500 mb-6 max-w-xs mx-auto"><strong>${t.nama}</strong> akan dihapus dari daftar. Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-2">
+                    <button onclick="nmsCloseModal()" class="flex-1 py-2.5 text-xs font-extrabold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl">Batal</button>
+                    <button onclick="nmsDeleteTitik('${tid}')" class="flex-1 py-2.5 text-xs font-extrabold text-white bg-rose-500 hover:bg-rose-600 rounded-2xl">
+                        <i class="fas fa-trash mr-1 text-[9px]"></i>Hapus
+                    </button>
+                </div>
+            </div>`);
+    }
+
+    function nmsDeleteTitik(tid) {
+        nmsTitik = nmsTitik.filter(x => x.id !== tid);
+        nmsCloseModal();
+        nmsRenderSummary();
+        nmsRenderList();
+        frmToast('Titik dihapus', '#64748b');
+    }
+
+    // ── Modal utility ──
+    function nmsModal(innerHTML) {
+        let ov = document.getElementById('nms-modal-ov');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'nms-modal-ov';
+            ov.className = 'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] flex items-center justify-center p-4';
+            ov.onclick = e => { if (e.target === ov) nmsCloseModal(); };
+            document.body.appendChild(ov);
+        }
+        ov.innerHTML = `<div id="nms-modal-box" class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto" style="transform:scale(.95);opacity:0;transition:transform .2s,opacity .2s">${innerHTML}</div>`;
+        ov.style.display = 'flex';
+        requestAnimationFrame(() => {
+            const b = document.getElementById('nms-modal-box');
+            if (b) { b.style.transform = 'scale(1)'; b.style.opacity = '1'; }
+        });
+    }
+
+    function nmsCloseModal() {
+        const ov = document.getElementById('nms-modal-ov');
+        const b  = document.getElementById('nms-modal-box');
+        if (b) { b.style.transform = 'scale(.95)'; b.style.opacity = '0'; }
+        setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
+    }
 
     </script>
 </body>
