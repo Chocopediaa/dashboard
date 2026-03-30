@@ -2385,6 +2385,52 @@
             </div>
         </div><!-- /nms-fisik-page -->
 
+        <!-- ════════════════════════════════════════════════════════════
+             MONITORING REPOSITORY
+             ════════════════════════════════════════════════════════════ -->
+        <div id="nms-repository-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <!-- Top bar -->
+            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+                    <i class="fa-solid fa-code-branch"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-800 text-sm">Monitoring Repository</div>
+                    <div class="text-xs text-slate-400">CI/CD · Versi · Changelog – Infrastruktur DC Jabar</div>
+                </div>
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black border border-emerald-200"><i class="fa-brands fa-git-alt mr-1"></i>Gitea On-Premise</span>
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black border border-indigo-200"><i class="fa-solid fa-infinity mr-1"></i>CI/CD Aktif</span>
+                </div>
+            </div>
+            <!-- Summary cards -->
+            <div id="repo-summary" class="grid grid-cols-5 gap-3 px-6 py-3 flex-shrink-0"></div>
+            <!-- Tab bar -->
+            <div class="flex border-b border-slate-200 bg-white px-6 flex-shrink-0">
+                <button onclick="repoTabSwitch('repos')"     class="fz-pg-tab active" id="repo-tab-btn-repos">
+                    Repository
+                </button>
+                <button onclick="repoTabSwitch('pipeline')"  class="fz-pg-tab" id="repo-tab-btn-pipeline">
+                    Pipeline Runs
+                    <span id="repo-fail-badge" class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-red-100 text-red-700" style="display:none"></span>
+                </button>
+                <button onclick="repoTabSwitch('changelog')" class="fz-pg-tab" id="repo-tab-btn-changelog">
+                    Changelog
+                </button>
+            </div>
+            <!-- Tab: Repository list -->
+            <div id="repo-tab-repos"      class="flex-1 overflow-y-auto"></div>
+            <!-- Tab: Pipeline runs -->
+            <div id="repo-tab-pipeline"   class="flex-1 overflow-y-auto p-5" style="display:none"></div>
+            <!-- Tab: Changelog -->
+            <div id="repo-tab-changelog"  class="flex-1 overflow-y-auto p-5" style="display:none"></div>
+        </div><!-- /nms-repository-page -->
+
+        <!-- Repository modal overlay -->
+        <div id="repo-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+            <div id="repo-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden transform scale-95 transition-all duration-200"></div>
+        </div>
+
         <!-- Fisik modal overlay -->
         <div id="fz-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
             <div id="fz-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200 transition-opacity duration-200"></div>
@@ -3723,6 +3769,139 @@
                       note:'Tekanan turun ke 38 bar (nominal 42 bar) — jadwalkan pengecekan & pengisian ulang' },
                 ],
             },
+            repo_data: {
+                repos: [
+                    {
+                        id:'repo-001', name:'portal-diskominfo',
+                        description:'Portal utama Diskominfo Jabar – informasi publik & layanan digital',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'PHP', lang_color:'#4F5D95',
+                        current_tag:'v3.1.2', contributors:5, open_issues:3,
+                        last_commit:{ hash:'a3f7d92', message:'fix: perbaiki validasi form kontak & captcha', author:'Rina Pertiwi', ts:'30 Mar 2026, 08:45' },
+                        pipeline:{ status:'passing', last_run:'30 Mar 2026, 08:52', run_no:'247', duration_s:156,
+                            stages:[ {name:'clone',status:'passing',duration_s:4},{name:'build',status:'passing',duration_s:48},{name:'test',status:'passing',duration_s:61},{name:'push',status:'passing',duration_s:22},{name:'deploy-stg',status:'passing',duration_s:21} ] },
+                        environments:[ {name:'Production',vm:'vm-diskominfo-portal-01',version:'v3.1.2',status:'running',up_to_date:true},{name:'Staging',vm:'vm-diskominfo-stg-01',version:'v3.1.2',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-002', name:'jdih-web',
+                        description:'Portal JDIH – Jaringan Dokumentasi dan Informasi Hukum Prov. Jabar',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'PHP', lang_color:'#4F5D95',
+                        current_tag:'v2.4.1', contributors:3, open_issues:2,
+                        last_commit:{ hash:'b9e2c14', message:'fix: perbaiki pagination daftar peraturan daerah', author:'Deni Kurniawan', ts:'30 Mar 2026, 09:15' },
+                        pipeline:{ status:'passing', last_run:'30 Mar 2026, 09:22', run_no:'183', duration_s:142,
+                            stages:[ {name:'clone',status:'passing',duration_s:3},{name:'build',status:'passing',duration_s:44},{name:'test',status:'passing',duration_s:52},{name:'push',status:'passing',duration_s:18},{name:'deploy-stg',status:'passing',duration_s:25} ] },
+                        environments:[ {name:'Production',vm:'vm-jdih-prod-01',version:'v2.4.0',status:'running',up_to_date:false},{name:'Staging',vm:'vm-jdih-stg-01',version:'v2.4.1',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-003', name:'satu-data-api',
+                        description:'RESTful API backend untuk platform Satu Data Jawa Barat',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'Node.js', lang_color:'#339933',
+                        current_tag:'v1.8.3', contributors:4, open_issues:1,
+                        last_commit:{ hash:'c4d8f31', message:'feat: tambah endpoint export dataset ke format CSV & XLSX', author:'Teguh Prasetyo', ts:'29 Mar 2026, 16:30' },
+                        pipeline:{ status:'passing', last_run:'29 Mar 2026, 16:38', run_no:'312', duration_s:198,
+                            stages:[ {name:'clone',status:'passing',duration_s:3},{name:'install',status:'passing',duration_s:35},{name:'lint',status:'passing',duration_s:18},{name:'test',status:'passing',duration_s:87},{name:'build',status:'passing',duration_s:28},{name:'deploy',status:'passing',duration_s:27} ] },
+                        environments:[ {name:'Production',vm:'vm-satudata-api-01',version:'v1.8.3',status:'running',up_to_date:true},{name:'Staging',vm:'vm-satudata-stg-01',version:'v1.8.3',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-004', name:'sipade-backend',
+                        description:'Backend service SIPADE – Sistem Informasi Pengadaan Daerah',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'release/4.2', language:'Java', lang_color:'#B07219',
+                        current_tag:'v4.2.1', contributors:6, open_issues:5,
+                        last_commit:{ hash:'d2a1e78', message:'perf: optimasi query pencarian lelang dengan full-text index', author:'Ahmad Dani', ts:'28 Mar 2026, 14:20' },
+                        pipeline:{ status:'passing', last_run:'28 Mar 2026, 14:31', run_no:'89', duration_s:284,
+                            stages:[ {name:'clone',status:'passing',duration_s:4},{name:'build',status:'passing',duration_s:122},{name:'test',status:'passing',duration_s:96},{name:'package',status:'passing',duration_s:31},{name:'deploy',status:'passing',duration_s:31} ] },
+                        environments:[ {name:'Production',vm:'vm-sipade-be-prod-01',version:'v4.2.1',status:'running',up_to_date:true},{name:'Staging',vm:'vm-sipade-be-stg-01',version:'v4.2.1',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-005', name:'sipade-frontend',
+                        description:'Antarmuka web SIPADE – dashboard pengadaan barang & jasa daerah',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'Vue.js', lang_color:'#41B883',
+                        current_tag:'v4.2.0', contributors:4, open_issues:2,
+                        last_commit:{ hash:'e5c9b22', message:'feat: halaman rekap anggaran per-SKPD dengan chart interaktif', author:'Sari Dewi', ts:'27 Mar 2026, 11:05' },
+                        pipeline:{ status:'passing', last_run:'27 Mar 2026, 11:14', run_no:'156', duration_s:203,
+                            stages:[ {name:'clone',status:'passing',duration_s:3},{name:'install',status:'passing',duration_s:42},{name:'lint',status:'passing',duration_s:24},{name:'build',status:'passing',duration_s:98},{name:'deploy-stg',status:'passing',duration_s:36} ] },
+                        environments:[ {name:'Production',vm:'vm-sipade-fe-prod-01',version:'v4.1.9',status:'running',up_to_date:false},{name:'Staging',vm:'vm-sipade-fe-stg-01',version:'v4.2.0',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-006', name:'auth-gateway',
+                        description:'Centralized authentication & authorization gateway – SSO Diskominfo Jabar',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'Go', lang_color:'#00ADD8',
+                        current_tag:'v2.0.2', contributors:3, open_issues:7,
+                        last_commit:{ hash:'f7d3c58', message:'refactor: pisahkan handler OAuth2 ke package terpisah', author:'Teguh Prasetyo', ts:'30 Mar 2026, 07:30' },
+                        pipeline:{ status:'failing', last_run:'30 Mar 2026, 07:38', run_no:'441', duration_s:93,
+                            fail_reason:'TestOAuthTokenRevocation: expected 200 got 500 — koneksi Redis timeout',
+                            stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:41},{name:'test',status:'failing',duration_s:50},{name:'push',status:'pending',duration_s:null},{name:'deploy',status:'pending',duration_s:null} ] },
+                        environments:[ {name:'Production',vm:'vm-auth-gateway-prod',version:'v2.0.1',status:'running',up_to_date:false},{name:'Staging',vm:'vm-auth-gateway-stg',version:'v2.0.1',status:'running',up_to_date:false} ]
+                    },
+                    {
+                        id:'repo-007', name:'monitoring-infra',
+                        description:'Agen monitoring infrastruktur – pengumpul metrik server & jaringan',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'Python', lang_color:'#3572A5',
+                        current_tag:'v0.9.7', contributors:2, open_issues:0,
+                        last_commit:{ hash:'g1b4a91', message:'ci: update base Docker image ke python:3.12-slim', author:'Teguh Prasetyo', ts:'30 Mar 2026, 06:00' },
+                        pipeline:{ status:'passing', last_run:'30 Mar 2026, 06:08', run_no:'72', duration_s:88,
+                            stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:31},{name:'test',status:'passing',duration_s:28},{name:'push',status:'passing',duration_s:15},{name:'deploy',status:'passing',duration_s:12} ] },
+                        environments:[ {name:'Production',vm:'wv-proxmox-01 / 02 / 03',version:'v0.9.7',status:'running',up_to_date:true} ]
+                    },
+                    {
+                        id:'repo-008', name:'backup-agent',
+                        description:'Otomatisasi backup – orkestrasi Veeam & Bacula untuk DC Jabar',
+                        platform:'Gitea', platform_icon:'git-alt', platform_color:'#609926',
+                        branch:'main', language:'Python', lang_color:'#3572A5',
+                        current_tag:'v1.3.2', contributors:2, open_issues:1,
+                        last_commit:{ hash:'h3e7f04', message:'feat: tambah notifikasi Telegram saat backup selesai/gagal', author:'Andi Permana', ts:'30 Mar 2026, 09:50' },
+                        pipeline:{ status:'running', last_run:'30 Mar 2026, 09:55', run_no:'63', duration_s:null,
+                            stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:28},{name:'test',status:'running',duration_s:null},{name:'push',status:'pending',duration_s:null},{name:'deploy',status:'pending',duration_s:null} ] },
+                        environments:[ {name:'Production',vm:'vm-backup-agent-01',version:'v1.3.1',status:'running',up_to_date:false} ]
+                    },
+                ],
+                pipeline_runs: [
+                    { id:'run-001', repo_id:'repo-008', repo_name:'backup-agent',       run_no:'63',  trigger:'push',     branch:'main',        commit_hash:'h3e7f04', commit_msg:'feat: tambah notifikasi Telegram saat backup selesai/gagal',          actor:'Andi Permana',    ts_start:'30 Mar 2026, 09:55', duration_s:null, status:'running',
+                        stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:28},{name:'test',status:'running',duration_s:null},{name:'push',status:'pending',duration_s:null},{name:'deploy',status:'pending',duration_s:null} ] },
+                    { id:'run-002', repo_id:'repo-002', repo_name:'jdih-web',           run_no:'183', trigger:'push',     branch:'main',        commit_hash:'b9e2c14', commit_msg:'fix: perbaiki pagination daftar peraturan daerah',                    actor:'Deni Kurniawan',  ts_start:'30 Mar 2026, 09:22', duration_s:142,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:3},{name:'build',status:'passing',duration_s:44},{name:'test',status:'passing',duration_s:52},{name:'push',status:'passing',duration_s:18},{name:'deploy-stg',status:'passing',duration_s:25} ] },
+                    { id:'run-003', repo_id:'repo-001', repo_name:'portal-diskominfo',  run_no:'247', trigger:'push',     branch:'main',        commit_hash:'a3f7d92', commit_msg:'fix: perbaiki validasi form kontak & captcha',                        actor:'Rina Pertiwi',    ts_start:'30 Mar 2026, 08:52', duration_s:156,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:4},{name:'build',status:'passing',duration_s:48},{name:'test',status:'passing',duration_s:61},{name:'push',status:'passing',duration_s:22},{name:'deploy-stg',status:'passing',duration_s:21} ] },
+                    { id:'run-004', repo_id:'repo-006', repo_name:'auth-gateway',       run_no:'441', trigger:'push',     branch:'main',        commit_hash:'f7d3c58', commit_msg:'refactor: pisahkan handler OAuth2 ke package terpisah',               actor:'Teguh Prasetyo',  ts_start:'30 Mar 2026, 07:38', duration_s:93,   status:'failing',
+                        fail_reason:'TestOAuthTokenRevocation: expected 200 got 500 — koneksi Redis timeout',
+                        stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:41},{name:'test',status:'failing',duration_s:50},{name:'push',status:'pending',duration_s:null},{name:'deploy',status:'pending',duration_s:null} ] },
+                    { id:'run-005', repo_id:'repo-007', repo_name:'monitoring-infra',   run_no:'72',  trigger:'push',     branch:'main',        commit_hash:'g1b4a91', commit_msg:'ci: update base Docker image ke python:3.12-slim',                    actor:'Teguh Prasetyo',  ts_start:'30 Mar 2026, 06:08', duration_s:88,   status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:31},{name:'test',status:'passing',duration_s:28},{name:'push',status:'passing',duration_s:15},{name:'deploy',status:'passing',duration_s:12} ] },
+                    { id:'run-006', repo_id:'repo-003', repo_name:'satu-data-api',      run_no:'312', trigger:'push',     branch:'main',        commit_hash:'c4d8f31', commit_msg:'feat: tambah endpoint export dataset ke format CSV & XLSX',            actor:'Teguh Prasetyo',  ts_start:'29 Mar 2026, 16:38', duration_s:198,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:3},{name:'install',status:'passing',duration_s:35},{name:'lint',status:'passing',duration_s:18},{name:'test',status:'passing',duration_s:87},{name:'build',status:'passing',duration_s:28},{name:'deploy',status:'passing',duration_s:27} ] },
+                    { id:'run-007', repo_id:'repo-005', repo_name:'sipade-frontend',    run_no:'156', trigger:'push',     branch:'main',        commit_hash:'e5c9b22', commit_msg:'feat: halaman rekap anggaran per-SKPD dengan chart interaktif',        actor:'Sari Dewi',       ts_start:'27 Mar 2026, 11:14', duration_s:203,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:3},{name:'install',status:'passing',duration_s:42},{name:'lint',status:'passing',duration_s:24},{name:'build',status:'passing',duration_s:98},{name:'deploy-stg',status:'passing',duration_s:36} ] },
+                    { id:'run-008', repo_id:'repo-004', repo_name:'sipade-backend',     run_no:'89',  trigger:'push',     branch:'release/4.2', commit_hash:'d2a1e78', commit_msg:'perf: optimasi query pencarian lelang dengan full-text index',          actor:'Ahmad Dani',      ts_start:'28 Mar 2026, 14:31', duration_s:284,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:4},{name:'build',status:'passing',duration_s:122},{name:'test',status:'passing',duration_s:96},{name:'package',status:'passing',duration_s:31},{name:'deploy',status:'passing',duration_s:31} ] },
+                    { id:'run-009', repo_id:'repo-006', repo_name:'auth-gateway',       run_no:'440', trigger:'push',     branch:'main',        commit_hash:'e1f9c72', commit_msg:'fix: token refresh gagal ketika user session kedaluwarsa',             actor:'Teguh Prasetyo',  ts_start:'29 Mar 2026, 10:12', duration_s:87,   status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:2},{name:'build',status:'passing',duration_s:38},{name:'test',status:'passing',duration_s:31},{name:'push',status:'passing',duration_s:9},{name:'deploy',status:'passing',duration_s:7} ] },
+                    { id:'run-010', repo_id:'repo-001', repo_name:'portal-diskominfo',  run_no:'246', trigger:'schedule', branch:'main',        commit_hash:'7d4a331', commit_msg:'chore: perbarui dependency laravel/framework ke 10.48',                actor:'CI/CD Bot',       ts_start:'29 Mar 2026, 17:15', duration_s:148,  status:'passing',
+                        stages:[ {name:'clone',status:'passing',duration_s:4},{name:'build',status:'passing',duration_s:51},{name:'test',status:'passing',duration_s:59},{name:'push',status:'passing',duration_s:18},{name:'deploy-stg',status:'passing',duration_s:16} ] },
+                ],
+                commits: [
+                    { repo_id:'repo-008', repo_name:'backup-agent',      hash:'h3e7f04', message:'feat: tambah notifikasi Telegram saat backup selesai/gagal',                 author:'Andi Permana',    ts:'30 Mar 2026, 09:50', type:'feat',     branch:'main'        },
+                    { repo_id:'repo-002', repo_name:'jdih-web',          hash:'b9e2c14', message:'fix: perbaiki pagination daftar peraturan daerah',                             author:'Deni Kurniawan',  ts:'30 Mar 2026, 09:15', type:'fix',      branch:'main'        },
+                    { repo_id:'repo-001', repo_name:'portal-diskominfo', hash:'a3f7d92', message:'fix: perbaiki validasi form kontak & captcha',                                 author:'Rina Pertiwi',    ts:'30 Mar 2026, 08:45', type:'fix',      branch:'main'        },
+                    { repo_id:'repo-006', repo_name:'auth-gateway',      hash:'f7d3c58', message:'refactor: pisahkan handler OAuth2 ke package terpisah',                        author:'Teguh Prasetyo',  ts:'30 Mar 2026, 07:30', type:'refactor', branch:'main'        },
+                    { repo_id:'repo-007', repo_name:'monitoring-infra',  hash:'g1b4a91', message:'ci: update base Docker image ke python:3.12-slim',                             author:'Teguh Prasetyo',  ts:'30 Mar 2026, 06:00', type:'ci',       branch:'main'        },
+                    { repo_id:'repo-001', repo_name:'portal-diskominfo', hash:'7d4a331', message:'chore: perbarui dependency laravel/framework ke 10.48',                        author:'Rina Pertiwi',    ts:'29 Mar 2026, 17:10', type:'chore',    branch:'main'        },
+                    { repo_id:'repo-003', repo_name:'satu-data-api',     hash:'c4d8f31', message:'feat: tambah endpoint export dataset ke format CSV & XLSX',                    author:'Teguh Prasetyo',  ts:'29 Mar 2026, 16:30', type:'feat',     branch:'main'        },
+                    { repo_id:'repo-006', repo_name:'auth-gateway',      hash:'e1f9c72', message:'fix: token refresh gagal ketika user session kedaluwarsa',                     author:'Teguh Prasetyo',  ts:'29 Mar 2026, 10:00', type:'fix',      branch:'main'        },
+                    { repo_id:'repo-004', repo_name:'sipade-backend',    hash:'d2a1e78', message:'perf: optimasi query pencarian lelang dengan full-text index',                  author:'Ahmad Dani',      ts:'28 Mar 2026, 14:20', type:'perf',     branch:'release/4.2' },
+                    { repo_id:'repo-004', repo_name:'sipade-backend',    hash:'a9c3b15', message:'docs: update OpenAPI spec untuk endpoint pengadaan langsung',                   author:'Ahmad Dani',      ts:'27 Mar 2026, 09:00', type:'docs',     branch:'release/4.2' },
+                    { repo_id:'repo-005', repo_name:'sipade-frontend',   hash:'e5c9b22', message:'feat: halaman rekap anggaran per-SKPD dengan chart interaktif',                 author:'Sari Dewi',       ts:'27 Mar 2026, 11:05', type:'feat',     branch:'main'        },
+                    { repo_id:'repo-001', repo_name:'portal-diskominfo', hash:'f2e8b44', message:'deploy: v3.1.1 → v3.1.2 ke production via CI/CD',                              author:'CI/CD Bot',       ts:'26 Mar 2026, 10:00', type:'deploy',   branch:'main'        },
+                    { repo_id:'repo-007', repo_name:'monitoring-infra',  hash:'b7a2d68', message:'feat: tambah collector metrik disk I/O per-volume',                             author:'Teguh Prasetyo',  ts:'26 Mar 2026, 14:22', type:'feat',     branch:'main'        },
+                    { repo_id:'repo-003', repo_name:'satu-data-api',     hash:'d9e1a47', message:'fix: race condition pada concurrent request export dataset besar',              author:'Teguh Prasetyo',  ts:'26 Mar 2026, 08:15', type:'fix',      branch:'main'        },
+                    { repo_id:'repo-002', repo_name:'jdih-web',          hash:'c5f3b92', message:'chore: update composer.lock & bersihkan route yang tidak terpakai',             author:'Deni Kurniawan',  ts:'25 Mar 2026, 15:40', type:'chore',    branch:'main'        },
+                ],
+            },
             aplikasi: [
                 { id:901, nama:'SIMRS',                skpd:'Dinas Kesehatan',    pic:'Ahmad Dani',      kontak:'0812-3456-7890', fungsi:'Sistem Informasi Manajemen Rumah Sakit — pencatatan rekam medis, antrian, dan billing pasien.',            aksesibilitas:'Publik',   kritikalitas:'Kritis', app_status:'Online',      stack_fe:'Vue.js 3',        stack_be:'Laravel 10',   stack_db:'PostgreSQL 15',  vm:'vm-dinkes-simrs-01',         ip_pub:'103.12.5.10',  waf:true,  ssl:true,  uptime:99.9, last_deploy:'15 Mar 2026' },
                 { id:902, nama:'SIPPKD',               skpd:'BPKAD',              pic:'Mega Rahma',      kontak:'0856-222-333',   fungsi:'Sistem Informasi Pengelolaan Pendapatan dan Keuangan Daerah.',                                               aksesibilitas:'Internal', kritikalitas:'Kritis', app_status:'Online',      stack_fe:'React 18',        stack_be:'Spring Boot',  stack_db:'Oracle 19c',     vm:'vm-bpkad-sippkd-01',         ip_pub:'103.12.8.10',  waf:true,  ssl:true,  uptime:99.8, last_deploy:'10 Mar 2026' },
@@ -3932,7 +4111,7 @@
             document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
 
             // Hide all custom pages first
-            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page','nms-backup-page','nms-edr-page','nms-waf-page','nms-fw-page','nms-fisik-page'];
+            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page','nms-backup-page','nms-edr-page','nms-waf-page','nms-fw-page','nms-fisik-page','nms-repository-page'];
             customPages.forEach(p => { const el2 = document.getElementById(p); if (el2) el2.style.display = 'none'; });
 
             if (pageId === 'dashboard') {
@@ -3992,6 +4171,12 @@
                 document.getElementById('default-page').style.display = 'none';
                 document.getElementById('nms-fisik-page').style.display = 'flex';
                 if (!fzInitialized) { fzInit(); fzInitialized = true; } else { fzRenderAll(); }
+            } else if (pageId === 'mon-repository') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('nms-repository-page').style.display = 'flex';
+                if (!repoInitialized) { repoInit(); repoInitialized = true; } else { repoRenderAll(); }
             } else {
                 el.classList.add('active');
                 document.getElementById('content-container').style.display = 'none';
@@ -13406,6 +13591,375 @@
     function fzCloseModal() {
         const ov  = document.getElementById('fz-modal-ov');
         const box = document.getElementById('fz-modal-box');
+        if (box) { box.style.transform = 'scale(.95)'; box.style.opacity = '0'; }
+        setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  MONITORING REPOSITORY
+    // ════════════════════════════════════════════════════════════
+    let repoInitialized = false;
+    let repoCurrentTab  = 'repos';
+
+    const repoPipelineCfg = {
+        passing: { color:'emerald', label:'Passing',  icon:'fa-circle-check'  },
+        failing: { color:'red',     label:'Failing',  icon:'fa-circle-xmark'  },
+        running: { color:'blue',    label:'Running',  icon:'fa-spinner fa-spin' },
+        pending: { color:'slate',   label:'Pending',  icon:'fa-clock'          },
+    };
+    const repoCommitTypeCfg = {
+        feat:    { bg:'bg-emerald-100', text:'text-emerald-700', border:'border-emerald-200', dot:'bg-emerald-500' },
+        fix:     { bg:'bg-red-100',     text:'text-red-700',     border:'border-red-200',     dot:'bg-red-500'     },
+        chore:   { bg:'bg-slate-100',   text:'text-slate-600',   border:'border-slate-200',   dot:'bg-slate-400'   },
+        ci:      { bg:'bg-blue-100',    text:'text-blue-700',    border:'border-blue-200',    dot:'bg-blue-500'    },
+        docs:    { bg:'bg-violet-100',  text:'text-violet-700',  border:'border-violet-200',  dot:'bg-violet-500'  },
+        deploy:  { bg:'bg-amber-100',   text:'text-amber-700',   border:'border-amber-200',   dot:'bg-amber-500'   },
+        perf:    { bg:'bg-cyan-100',    text:'text-cyan-700',    border:'border-cyan-200',    dot:'bg-cyan-500'    },
+        refactor:{ bg:'bg-orange-100',  text:'text-orange-700',  border:'border-orange-200',  dot:'bg-orange-500'  },
+    };
+
+    function repoInit() { repoRenderAll(); }
+
+    function repoRenderAll() {
+        repoRenderSummary();
+        repoUpdateBadge();
+        if (repoCurrentTab === 'repos')     repoRenderList();
+        if (repoCurrentTab === 'pipeline')  repoRenderPipeline();
+        if (repoCurrentTab === 'changelog') repoRenderChangelog();
+    }
+
+    function repoTabSwitch(tab) {
+        repoCurrentTab = tab;
+        ['repos','pipeline','changelog'].forEach(t => {
+            const btn = document.getElementById('repo-tab-btn-' + t);
+            const div = document.getElementById('repo-tab-' + t);
+            if (btn) btn.classList.toggle('active', t === tab);
+            if (div) div.style.display = t === tab ? '' : 'none';
+        });
+        if (tab === 'repos')     repoRenderList();
+        if (tab === 'pipeline')  repoRenderPipeline();
+        if (tab === 'changelog') repoRenderChangelog();
+    }
+
+    function repoUpdateBadge() {
+        const repos = mockData.repo_data?.repos || [];
+        const failing = repos.filter(r => r.pipeline.status === 'failing').length;
+        const badge = document.getElementById('repo-fail-badge');
+        if (badge) { badge.textContent = failing || ''; badge.style.display = failing ? '' : 'none'; }
+    }
+
+    function repoRenderSummary() {
+        const el = document.getElementById('repo-summary');
+        if (!el) return;
+        const repos   = mockData.repo_data?.repos || [];
+        const runs    = mockData.repo_data?.pipeline_runs || [];
+        const total   = repos.length;
+        const passing = repos.filter(r => r.pipeline.status === 'passing').length;
+        const failing = repos.filter(r => r.pipeline.status === 'failing').length;
+        const running = repos.filter(r => r.pipeline.status === 'running').length;
+        const behind  = repos.filter(r => r.environments.some(e => !e.up_to_date)).length;
+
+        const cards = [
+            { label:'Total Repository', value:total,   icon:'fa-code-branch',    color:'indigo',  sub:'terhubung CI/CD'   },
+            { label:'Pipeline Passing',  value:passing, icon:'fa-circle-check',   color:'emerald', sub:'build & test ✓'    },
+            { label:'Pipeline Failing',  value:failing, icon:'fa-circle-xmark',   color:'red',     sub:'perlu investigasi'  },
+            { label:'Sedang Berjalan',   value:running, icon:'fa-spinner',        color:'blue',    sub:'in progress'        },
+            { label:'Prod Tertinggal',   value:behind,  icon:'fa-arrow-rotate-right', color:'amber', sub:'butuh deploy prod' },
+        ];
+        el.innerHTML = cards.map(c => `
+            <div class="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-${c.color}-100 flex-shrink-0">
+                    <i class="fas ${c.icon} text-${c.color}-600 text-sm${c.icon === 'fa-spinner' && c.value > 0 ? ' animate-spin' : ''}"></i>
+                </div>
+                <div>
+                    <div class="text-xl font-black text-slate-800 leading-none">${c.value}</div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">${c.label}</div>
+                    <div class="text-[9px] text-slate-400">${c.sub}</div>
+                </div>
+            </div>`).join('');
+    }
+
+    function repoRenderList() {
+        const el = document.getElementById('repo-tab-repos');
+        if (!el) return;
+        const repos = mockData.repo_data?.repos || [];
+
+        const cards = repos.map(r => {
+            const pc = repoPipelineCfg[r.pipeline.status] || repoPipelineCfg.pending;
+            const envBadges = r.environments.map(e => {
+                const vc = e.up_to_date ? 'emerald' : 'amber';
+                const vi = e.up_to_date ? 'fa-check' : 'fa-arrow-up';
+                return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-${vc}-50 text-${vc}-700 border border-${vc}-200 whitespace-nowrap">
+                    <i class="fas ${vi} text-[7px]"></i>${e.name} <span class="font-mono">${e.version}</span></span>`;
+            }).join('');
+
+            const stagesMini = r.pipeline.stages.map(s => {
+                const sc = { passing:'bg-emerald-400', failing:'bg-red-400', running:'bg-blue-400', pending:'bg-slate-200', skipped:'bg-slate-200' }[s.status] || 'bg-slate-200';
+                return `<div class="w-4 h-1.5 rounded-full ${sc} flex-shrink-0" title="${s.name}: ${s.status}"></div>`;
+            }).join('');
+
+            const durationTxt = r.pipeline.duration_s
+                ? `${Math.floor(r.pipeline.duration_s/60)}m ${r.pipeline.duration_s%60}s`
+                : r.pipeline.status === 'running' ? 'Berjalan…' : '–';
+
+            return `
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+                 onclick="repoOpenDetail('${r.id}')">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-2 mb-2.5">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${r.platform_color}20">
+                            <i class="fa-brands fa-${r.platform_icon} text-sm" style="color:${r.platform_color}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-black text-slate-800 text-sm truncate">${r.name}</div>
+                            <div class="text-[10px] text-slate-400 truncate">${r.description}</div>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black bg-${pc.color}-50 text-${pc.color}-700 border border-${pc.color}-200 flex-shrink-0">
+                        <i class="fas ${pc.icon} text-[9px]"></i>${pc.label}
+                    </span>
+                </div>
+                <!-- Meta tags -->
+                <div class="flex items-center gap-1.5 mb-2.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-600">
+                        <i class="fas fa-code-branch text-[8px]"></i>${r.branch}
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold" style="background:${r.lang_color}18;color:${r.lang_color}">
+                        <i class="fas fa-circle text-[6px]"></i>${r.language}
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <i class="fas fa-tag text-[8px]"></i>${r.current_tag}
+                    </span>
+                    <span class="text-[9px] text-slate-400 ml-auto font-mono">#${r.pipeline.run_no} · ${durationTxt}</span>
+                </div>
+                <!-- Last commit -->
+                <div class="bg-slate-50 rounded-lg px-3 py-2 mb-2.5">
+                    <div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-0.5">Commit Terakhir</div>
+                    <div class="text-[11px] text-slate-700 font-semibold truncate">${r.last_commit.message}</div>
+                    <div class="text-[9px] text-slate-400 mt-0.5">${r.last_commit.author} · ${r.last_commit.ts} · <span class="font-mono">${r.last_commit.hash}</span></div>
+                </div>
+                <!-- Pipeline stages mini bar -->
+                <div class="flex items-center gap-1 mb-2.5">${stagesMini}</div>
+                <!-- Environments -->
+                <div class="flex items-center gap-1.5 flex-wrap">${envBadges}</div>
+                ${r.pipeline.fail_reason ? `<div class="mt-2 px-2.5 py-1.5 bg-red-50 border border-red-200 rounded-lg text-[10px] text-red-700 font-semibold"><i class="fas fa-triangle-exclamation mr-1"></i>${r.pipeline.fail_reason}</div>` : ''}
+            </div>`;
+        });
+
+        el.innerHTML = `<div class="p-5"><div class="grid grid-cols-2 gap-4">${cards.join('')}</div></div>`;
+    }
+
+    function repoRenderPipeline() {
+        const el = document.getElementById('repo-tab-pipeline');
+        if (!el) return;
+        const runs = mockData.repo_data?.pipeline_runs || [];
+
+        const rows = runs.map(run => {
+            const pc = repoPipelineCfg[run.status] || repoPipelineCfg.pending;
+            const triggerCfg = {
+                push:     { icon:'fa-code-commit',    color:'slate'  },
+                manual:   { icon:'fa-hand-pointer',   color:'violet' },
+                schedule: { icon:'fa-clock',          color:'amber'  },
+                tag:      { icon:'fa-tag',            color:'emerald'},
+            };
+            const tc = triggerCfg[run.trigger] || triggerCfg.push;
+            const durationTxt = run.duration_s ? `${Math.floor(run.duration_s/60)}m ${run.duration_s%60}s` : 'Berjalan…';
+
+            const stagesHtml = run.stages.map((s, i) => {
+                const sc = { passing:'emerald', failing:'red', running:'blue', pending:'slate', skipped:'slate' }[s.status] || 'slate';
+                const si = { passing:'fa-check', failing:'fa-times', running:'fa-spinner fa-spin', pending:'fa-ellipsis', skipped:'fa-minus' }[s.status] || 'fa-circle';
+                const connector = i < run.stages.length - 1
+                    ? `<div class="w-3 h-px bg-slate-200 flex-shrink-0 mt-[14px]"></div>` : '';
+                return `<div class="flex flex-col items-center gap-0.5">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-${sc}-100 border border-${sc}-200">
+                        <i class="fas ${si} text-${sc}-600 text-[10px]"></i>
+                    </div>
+                    <span class="text-[8px] text-slate-500 font-bold">${s.name}</span>
+                    ${s.duration_s ? `<span class="text-[7px] text-slate-400">${s.duration_s}s</span>` : ''}
+                </div>${connector}`;
+            }).join('');
+
+            return `
+            <div class="bg-white border-b border-slate-100 px-5 py-4 hover:bg-slate-50/60 transition-colors">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-${pc.color}-100 border border-${pc.color}-200 mt-0.5">
+                        <i class="fas ${pc.icon} text-${pc.color}-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+                            <span class="font-black text-slate-800 text-sm">${run.repo_name}</span>
+                            <span class="text-[9px] text-slate-400 font-mono">#${run.run_no}</span>
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-${tc.color}-100 text-${tc.color}-700">
+                                <i class="fas ${tc.icon} text-[8px]"></i>${run.trigger}
+                            </span>
+                            <span class="ml-auto text-[9px] text-slate-400">${run.ts_start} · ${durationTxt}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600 mb-1 truncate">${run.commit_msg}</div>
+                        <div class="text-[9px] text-slate-400 mb-3 flex items-center gap-2 flex-wrap">
+                            <span><i class="fas fa-code-branch text-[8px]"></i> ${run.branch}</span>
+                            <span class="font-mono">${run.commit_hash}</span>
+                            <span><i class="fas fa-user text-[8px]"></i> ${run.actor}</span>
+                        </div>
+                        <div class="flex items-start gap-0.5 flex-wrap">${stagesHtml}</div>
+                        ${run.fail_reason ? `<div class="mt-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-[10px] text-red-700 font-semibold"><i class="fas fa-triangle-exclamation mr-1"></i>${run.fail_reason}</div>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        el.innerHTML = `
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-wider">Riwayat Pipeline Run</span>
+                    <span class="text-[10px] text-slate-400">${runs.length} run terbaru · semua repo</span>
+                </div>
+                ${rows.join('')}
+            </div>`;
+    }
+
+    function repoRenderChangelog() {
+        const el = document.getElementById('repo-tab-changelog');
+        if (!el) return;
+        const commits = mockData.repo_data?.commits || [];
+
+        const items = commits.map((c, i) => {
+            const tc = repoCommitTypeCfg[c.type] || repoCommitTypeCfg.chore;
+            const isLast = i === commits.length - 1;
+            return `
+            <div class="flex gap-3">
+                <div class="flex flex-col items-center flex-shrink-0">
+                    <div class="w-3 h-3 rounded-full ${tc.dot} border-2 border-white shadow-sm mt-0.5 flex-shrink-0"></div>
+                    ${!isLast ? `<div class="w-px flex-1 bg-slate-200 my-1 min-h-[20px]"></div>` : ''}
+                </div>
+                <div class="pb-4 flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black ${tc.bg} ${tc.text} border ${tc.border}">${c.type}</span>
+                        <span class="text-[10px] font-black text-slate-700 truncate">${c.repo_name}</span>
+                        <span class="font-mono text-[9px] text-slate-400">${c.hash}</span>
+                        <span class="text-[9px] text-slate-400 ml-auto whitespace-nowrap">${c.ts}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-700 font-semibold mb-0.5 truncate">${c.message}</div>
+                    <div class="text-[9px] text-slate-400 flex items-center gap-2">
+                        <span><i class="fas fa-code-branch text-[8px]"></i> ${c.branch}</span>
+                        <span><i class="fas fa-user text-[8px]"></i> ${c.author}</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        el.innerHTML = `
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-wider">Changelog Terpadu</span>
+                    <span class="text-[10px] text-slate-400">${commits.length} commit terakhir · semua repo</span>
+                </div>
+                <div>${items.join('')}</div>
+            </div>`;
+    }
+
+    function repoOpenDetail(repoId) {
+        const repos = mockData.repo_data?.repos || [];
+        const r = repos.find(x => x.id === repoId);
+        if (!r) return;
+        const pc = repoPipelineCfg[r.pipeline.status] || repoPipelineCfg.pending;
+
+        const stagesHtml = r.pipeline.stages.map((s, i) => {
+            const sc = { passing:'emerald', failing:'red', running:'blue', pending:'slate', skipped:'slate' }[s.status] || 'slate';
+            const si = { passing:'fa-check', failing:'fa-times', running:'fa-spinner fa-spin', pending:'fa-ellipsis', skipped:'fa-minus' }[s.status] || 'fa-circle';
+            const connector = i < r.pipeline.stages.length - 1
+                ? `<div class="w-5 h-px bg-slate-200 flex-shrink-0 mt-4"></div>` : '';
+            return `<div class="flex flex-col items-center gap-1">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-${sc}-100 border border-${sc}-200">
+                    <i class="fas ${si} text-${sc}-600 text-sm"></i>
+                </div>
+                <span class="text-[9px] text-slate-600 font-black text-center">${s.name}</span>
+                ${s.duration_s ? `<span class="text-[8px] text-slate-400">${s.duration_s}s</span>` : '<span class="text-[8px] text-slate-300">–</span>'}
+            </div>${connector}`;
+        }).join('');
+
+        const envRows = r.environments.map(e => {
+            const vc = e.up_to_date ? 'emerald' : 'amber';
+            return `<tr class="border-b border-slate-50 last:border-0">
+                <td class="py-2.5 pr-4 text-[11px] font-black text-slate-700">${e.name}</td>
+                <td class="py-2.5 pr-4 text-[11px] text-slate-500 font-mono">${e.vm}</td>
+                <td class="py-2.5 pr-4"><span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-${vc}-50 text-${vc}-700 border border-${vc}-200">${e.version}</span></td>
+                <td class="py-2.5 text-[10px] font-bold ${e.up_to_date ? 'text-emerald-600' : 'text-amber-600'}">${e.up_to_date ? '✓ Up-to-date' : '⚠ Tertinggal'}</td>
+            </tr>`;
+        }).join('');
+
+        const allCommits = (mockData.repo_data?.commits || []).filter(c => c.repo_id === r.id).slice(0, 5);
+        const commitRows = allCommits.map(c => {
+            const tc = repoCommitTypeCfg[c.type] || repoCommitTypeCfg.chore;
+            return `<div class="flex items-start gap-2 py-2 border-b border-slate-50 last:border-0">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black flex-shrink-0 ${tc.bg} ${tc.text} border ${tc.border}">${c.type}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[11px] text-slate-700 font-semibold truncate">${c.message}</div>
+                    <div class="text-[9px] text-slate-400">${c.author} · ${c.ts} · <span class="font-mono">${c.hash}</span></div>
+                </div>
+            </div>`;
+        }).join('');
+
+        repoShowModal(`
+            <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${r.platform_color}20">
+                        <i class="fa-brands fa-${r.platform_icon} text-sm" style="color:${r.platform_color}"></i>
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-800 text-sm">${r.name}</div>
+                        <div class="text-[10px] text-slate-400">${r.description}</div>
+                    </div>
+                    <span class="ml-2 px-2 py-0.5 rounded-lg text-[10px] font-black bg-${pc.color}-100 text-${pc.color}-700 border border-${pc.color}-200">${pc.label}</span>
+                </div>
+                <button onclick="repoCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors ml-3 flex-shrink-0">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="overflow-y-auto" style="max-height:calc(85vh - 64px)">
+                <!-- Info grid -->
+                <div class="p-5 grid grid-cols-3 gap-2.5">
+                    <div class="bg-slate-50 rounded-xl p-3 col-span-1"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Platform</div><div class="text-xs font-black text-slate-700">${r.platform}</div></div>
+                    <div class="bg-slate-50 rounded-xl p-3"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Bahasa</div><div class="text-xs font-black" style="color:${r.lang_color}">${r.language}</div></div>
+                    <div class="bg-slate-50 rounded-xl p-3"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Versi Terbaru</div><div class="text-xs font-black text-indigo-700">${r.current_tag}</div></div>
+                    <div class="bg-slate-50 rounded-xl p-3"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Branch</div><div class="text-xs font-black text-slate-700 font-mono">${r.branch}</div></div>
+                    <div class="bg-slate-50 rounded-xl p-3"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Kontributor</div><div class="text-xs font-black text-slate-700">${r.contributors} orang</div></div>
+                    <div class="bg-slate-50 rounded-xl p-3"><div class="text-[9px] text-slate-400 font-black uppercase tracking-wide mb-1">Issue Terbuka</div><div class="text-xs font-black ${r.open_issues > 0 ? 'text-amber-600' : 'text-emerald-600'}">${r.open_issues} issue</div></div>
+                </div>
+                <!-- Pipeline stages -->
+                <div class="px-5 pb-5">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-wide mb-3">Pipeline Stages — Run #${r.pipeline.run_no}</div>
+                    <div class="flex items-start gap-1 flex-wrap">${stagesHtml}</div>
+                    ${r.pipeline.fail_reason ? `<div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-700 font-semibold"><i class="fas fa-triangle-exclamation mr-1.5"></i>${r.pipeline.fail_reason}</div>` : ''}
+                </div>
+                <!-- Deployment environments -->
+                <div class="px-5 pb-5">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-wide mb-2">Deployment Environments</div>
+                    <div class="bg-slate-50 rounded-xl overflow-hidden">
+                        <table class="w-full"><tbody>${envRows}</tbody></table>
+                    </div>
+                </div>
+                <!-- Recent commits -->
+                <div class="px-5 pb-5">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-wide mb-2">Commit Terbaru</div>
+                    <div class="bg-slate-50 rounded-xl px-3 py-1">${commitRows || '<div class="text-[11px] text-slate-400 py-2">Tidak ada commit terbaru</div>'}</div>
+                </div>
+            </div>`);
+    }
+
+    function repoShowModal(html) {
+        const ov  = document.getElementById('repo-modal-ov');
+        const box = document.getElementById('repo-modal-box');
+        if (!ov || !box) return;
+        box.innerHTML = html;
+        box.style.transform = 'scale(.95)'; box.style.opacity = '0';
+        ov.style.display = 'flex';
+        setTimeout(() => { box.style.transform = 'scale(1)'; box.style.opacity = '1'; }, 10);
+    }
+
+    function repoCloseModal() {
+        const ov  = document.getElementById('repo-modal-ov');
+        const box = document.getElementById('repo-modal-box');
         if (box) { box.style.transform = 'scale(.95)'; box.style.opacity = '0'; }
         setTimeout(() => { if (ov) ov.style.display = 'none'; }, 200);
     }
