@@ -2738,6 +2738,63 @@
             <div id="bk-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200"></div>
         </div>
 
+        <!-- ════════════════════════════════════════════════════════════
+             PENGATURAN — UMUM
+             ════════════════════════════════════════════════════════════ -->
+        <div id="umum-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fa-solid fa-sliders"></i></div>
+                <div><div class="font-bold text-slate-800 text-sm">Pengaturan Umum</div><div class="text-xs text-slate-400">Manajemen Pengguna, Perangkat Daerah &amp; Master Data</div></div>
+            </div>
+            <div class="flex gap-0 px-6 bg-white border-b border-slate-200 flex-shrink-0">
+                <button id="umum-tab-btn-users" onclick="umumSwitchTab('users')" class="px-5 py-2.5 text-xs font-bold border-b-2 border-slate-600 text-slate-700">Pengguna</button>
+                <button id="umum-tab-btn-skpd" onclick="umumSwitchTab('skpd')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Perangkat Daerah</button>
+                <button id="umum-tab-btn-jabatan" onclick="umumSwitchTab('jabatan')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Jabatan</button>
+                <button id="umum-tab-btn-lokasi" onclick="umumSwitchTab('lokasi')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Lokasi / Gedung</button>
+                <button id="umum-tab-btn-kategori" onclick="umumSwitchTab('kategori')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Kategori Layanan</button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-6 py-4">
+                <div id="umum-tab-users"></div>
+                <div id="umum-tab-skpd" style="display:none"></div>
+                <div id="umum-tab-jabatan" style="display:none"></div>
+                <div id="umum-tab-lokasi" style="display:none"></div>
+                <div id="umum-tab-kategori" style="display:none"></div>
+            </div>
+        </div>
+        <div id="umum-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4" onclick="if(event.target===this)umumCloseModal()">
+            <div id="umum-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"></div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════════
+             PENGATURAN — SISTEM
+             ════════════════════════════════════════════════════════════ -->
+        <div id="sistem-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
+            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#1e3a5f,#1e40af)"><i class="fa-solid fa-gears"></i></div>
+                <div><div class="font-bold text-slate-800 text-sm">Pengaturan Sistem</div><div class="text-xs text-slate-400">Konfigurasi DCIM — SMTP, Domain, SSO, API &amp; Lainnya</div></div>
+                <div class="ml-auto"><button onclick="sistemSaveAll()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan Semua</button></div>
+            </div>
+            <div class="flex gap-0 px-6 bg-white border-b border-slate-200 flex-shrink-0">
+                <button id="sistem-tab-btn-smtp" onclick="sistemSwitchTab('smtp')" class="px-5 py-2.5 text-xs font-bold border-b-2 border-blue-700 text-blue-700">SMTP</button>
+                <button id="sistem-tab-btn-domain" onclick="sistemSwitchTab('domain')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Domain</button>
+                <button id="sistem-tab-btn-sso" onclick="sistemSwitchTab('sso')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">SSO</button>
+                <button id="sistem-tab-btn-api" onclick="sistemSwitchTab('api')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">API Keys</button>
+                <button id="sistem-tab-btn-backup" onclick="sistemSwitchTab('backup')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Backup &amp; Maintenance</button>
+                <button id="sistem-tab-btn-tentang" onclick="sistemSwitchTab('tentang')" class="px-5 py-2.5 text-xs font-bold text-slate-400 hover:text-slate-600">Tentang Aplikasi</button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-6 py-4">
+                <div id="sistem-tab-smtp"></div>
+                <div id="sistem-tab-domain" style="display:none"></div>
+                <div id="sistem-tab-sso" style="display:none"></div>
+                <div id="sistem-tab-api" style="display:none"></div>
+                <div id="sistem-tab-backup" style="display:none"></div>
+                <div id="sistem-tab-tentang" style="display:none"></div>
+            </div>
+        </div>
+        <div id="sistem-modal-ov" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4" onclick="if(event.target===this)sistemCloseModal()">
+            <div id="sistem-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6"></div>
+        </div>
+
     </main>
 
     <div id="project-overlay" onclick="closeProjectDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
@@ -4641,7 +4698,7 @@
             document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
 
             // Hide all custom pages first
-            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page','nms-backup-page','nms-edr-page','nms-waf-page','nms-fw-page','nms-fisik-page','nms-repository-page','nms-tiket-page','devops-zones-page','devops-cluster-page','devops-host-page','devops-storage-page','devops-cicd-page','sec-ips-pool-page','sec-domain-ns-page','sec-edr-page','sec-waf-page','sec-pam-page','sec-analisis-page'];
+            const customPages = ['kebijakan-page','wbs-page','formulir-page','formulir-cat-page','formulir-editor-page','nms-jipd-page','nms-backup-page','nms-edr-page','nms-waf-page','nms-fw-page','nms-fisik-page','nms-repository-page','nms-tiket-page','devops-zones-page','devops-cluster-page','devops-host-page','devops-storage-page','devops-cicd-page','sec-ips-pool-page','sec-domain-ns-page','sec-edr-page','sec-waf-page','sec-pam-page','sec-analisis-page','umum-page','sistem-page'];
             customPages.forEach(p => { const el2 = document.getElementById(p); if (el2) el2.style.display = 'none'; });
 
             if (pageId === 'dashboard') {
@@ -4779,6 +4836,18 @@
                 document.getElementById('default-page').style.display = 'none';
                 document.getElementById('sec-analisis-page').style.display = 'flex';
                 analisisInit();
+            } else if (pageId === 'umum') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('umum-page').style.display = 'flex';
+                umumInit();
+            } else if (pageId === 'sistem') {
+                el.classList.add('active');
+                document.getElementById('content-container').style.display = 'none';
+                document.getElementById('default-page').style.display = 'none';
+                document.getElementById('sistem-page').style.display = 'flex';
+                sistemInit();
             } else {
                 el.classList.add('active');
                 document.getElementById('content-container').style.display = 'none';
@@ -16293,8 +16362,678 @@
     function analisisScan() { alert('Vulnerability scan dimulai. Hasil akan tersedia dalam beberapa menit.'); }
     function analisisCloseModal() { _mgmtCloseModal('analisis-modal-ov'); }
 
+    // ════════════════════════════════════════
+    // PENGATURAN — UMUM
+    // ════════════════════════════════════════
+    let umumCurrentTab = 'users';
+    let umumInitialized = false;
+
+    // Master data
+    const umumData = {
+        users: [
+            {id:'USR-001', nama:'Andi Permana',    username:'andi.permana',    email:'andi.p@jabarprov.go.id',   role:'Administrator', skpd:'Diskominfo Jabar',  status:'active',  last_login:'31 Mar 2026 09:15', mfa:true},
+            {id:'USR-002', nama:'Teguh Prasetyo',  username:'teguh.prasetyo',  email:'teguh.p@jabarprov.go.id',  role:'DevOps Engineer',skpd:'Diskominfo Jabar',  status:'active',  last_login:'31 Mar 2026 08:42', mfa:true},
+            {id:'USR-003', nama:'Rina Pertiwi',    username:'rina.pertiwi',    email:'rina.p@jabarprov.go.id',   role:'Lead DevOps',   skpd:'Diskominfo Jabar',  status:'active',  last_login:'30 Mar 2026 14:30', mfa:true},
+            {id:'USR-004', nama:'Deni Kurniawan',  username:'deni.kurniawan',  email:'deni.k@jabarprov.go.id',   role:'Backend Dev',   skpd:'Diskominfo Jabar',  status:'active',  last_login:'30 Mar 2026 11:00', mfa:false},
+            {id:'USR-005', nama:'Mega Rahma',      username:'mega.rahma',      email:'mega.r@jabarprov.go.id',   role:'Viewer',        skpd:'Badan Keuangan',    status:'active',  last_login:'29 Mar 2026 16:00', mfa:false},
+            {id:'USR-006', nama:'Firman Maulana',  username:'firman.maulana',  email:'firman.m@jabarprov.go.id', role:'NOC Operator',  skpd:'Diskominfo Jabar',  status:'active',  last_login:'31 Mar 2026 07:00', mfa:true},
+            {id:'USR-007', nama:'Siska Rahmania',  username:'siska.rahmania',  email:'siska.r@jabarprov.go.id',  role:'Viewer',        skpd:'Diskominfo Jabar',  status:'active',  last_login:'28 Mar 2026 10:00', mfa:false},
+            {id:'USR-008', nama:'Budi Santoso',    username:'budi.santoso',    email:'budi.s@jabarprov.go.id',   role:'NOC Operator',  skpd:'Diskominfo Jabar',  status:'inactive',last_login:'01 Mar 2026 09:00', mfa:false},
+        ],
+        skpd: [
+            {id:'SKPD-001', nama:'Dinas Komunikasi dan Informatika', singkatan:'Diskominfo', kota:'Bandung', kepala:'Dr. Ika Mardiah, S.Sos, MM', kontak:'022-2032338', status:'active'},
+            {id:'SKPD-002', nama:'Badan Pengelolaan Keuangan Daerah', singkatan:'BPKAD', kota:'Bandung', kepala:'Drs. Ahmad Fauzi, MM', kontak:'022-2033001', status:'active'},
+            {id:'SKPD-003', nama:'Dinas Kesehatan', singkatan:'Dinkes', kota:'Bandung', kepala:'dr. Nina Agustina, M.Kes', kontak:'022-2032412', status:'active'},
+            {id:'SKPD-004', nama:'Dinas Pendidikan', singkatan:'Disdik', kota:'Bandung', kepala:'Drs. Dedi Supandi, M.MPd', kontak:'022-2033267', status:'active'},
+            {id:'SKPD-005', nama:'Dinas Sosial', singkatan:'Dinsos', kota:'Bandung', kepala:'Dra. Rahmat Hidayat, MM', kontak:'022-2032756', status:'active'},
+            {id:'SKPD-006', nama:'Badan Perencanaan Pembangunan Daerah', singkatan:'Bappeda', kota:'Bandung', kepala:'Dr. Sumasna, ST, MUM', kontak:'022-2032134', status:'active'},
+        ],
+        jabatan: [
+            {id:'JBT-001', nama:'Administrator Sistem',   level:'Struktural', grup:'IT',          keterangan:'Akses penuh seluruh sistem'},
+            {id:'JBT-002', nama:'DevOps Engineer',        level:'Fungsional', grup:'IT',          keterangan:'Kelola infrastruktur dan pipeline'},
+            {id:'JBT-003', nama:'NOC Operator',           level:'Fungsional', grup:'IT',          keterangan:'Monitoring jaringan dan insiden'},
+            {id:'JBT-004', nama:'Backend Developer',      level:'Fungsional', grup:'Development', keterangan:'Pengembangan aplikasi backend'},
+            {id:'JBT-005', nama:'Security Analyst',       level:'Fungsional', grup:'Security',    keterangan:'Analisis keamanan dan kerentanan'},
+            {id:'JBT-006', nama:'Database Administrator', level:'Fungsional', grup:'IT',          keterangan:'Kelola database dan backup'},
+            {id:'JBT-007', nama:'Viewer / Read-Only',     level:'Non-Struktural', grup:'Umum',   keterangan:'Hanya dapat melihat data'},
+        ],
+        lokasi: [
+            {id:'LOK-001', nama:'Gedung Sate',            alamat:'Jl. Diponegoro No.22, Bandung', lantai:'4', kapasitas:50, tipe:'Data Center', status:'active'},
+            {id:'LOK-002', nama:'Gedung UPTD TIK',        alamat:'Jl. Tamansari No.55, Bandung', lantai:'2', kapasitas:30, tipe:'Server Room', status:'active'},
+            {id:'LOK-003', nama:'Gedung Bappeda',         alamat:'Jl. Ir. H. Juanda No.278', lantai:'3', kapasitas:20, tipe:'Server Room', status:'active'},
+            {id:'LOK-004', nama:'DR Site Bandung Timur',  alamat:'Jl. Soekarno Hatta No.590', lantai:'1', kapasitas:40, tipe:'Disaster Recovery', status:'active'},
+            {id:'LOK-005', nama:'NOC Pusat',              alamat:'Jl. Diponegoro No.22, Bandung', lantai:'2', kapasitas:15, tipe:'NOC', status:'active'},
+        ],
+        kategori: [
+            {id:'KAT-001', nama:'Infrastruktur Jaringan', ikon:'fa-network-wired', warna:'sky',    keterangan:'Gangguan dan permohonan terkait jaringan', sla_jam:4},
+            {id:'KAT-002', nama:'Server & Komputasi',     ikon:'fa-server',        warna:'indigo', keterangan:'VM, Bare Metal, dan compute resource', sla_jam:6},
+            {id:'KAT-003', nama:'Keamanan Siber',         ikon:'fa-shield-halved', warna:'red',    keterangan:'Insiden keamanan dan ancaman siber', sla_jam:2},
+            {id:'KAT-004', nama:'Aplikasi & Layanan',     ikon:'fa-laptop-code',   warna:'violet', keterangan:'Bug, gangguan, dan permohonan aplikasi', sla_jam:8},
+            {id:'KAT-005', nama:'Storage & Backup',       ikon:'fa-database',      warna:'amber',  keterangan:'Volume storage dan konfigurasi backup', sla_jam:6},
+            {id:'KAT-006', nama:'Permintaan Umum',        ikon:'fa-circle-question',warna:'slate', keterangan:'Permohonan layanan umum lainnya', sla_jam:24},
+        ],
+    };
+
+    function umumInit() {
+        if (!umumInitialized) umumInitialized = true;
+        umumSwitchTab(umumCurrentTab);
+    }
+
+    function umumSwitchTab(tab) {
+        umumCurrentTab = tab;
+        ['users','skpd','jabatan','lokasi','kategori'].forEach(t => {
+            const btn = document.getElementById('umum-tab-btn-' + t);
+            const div = document.getElementById('umum-tab-' + t);
+            if (btn) {
+                btn.classList.toggle('border-b-2', t === tab);
+                btn.classList.toggle('border-slate-600', t === tab);
+                btn.classList.toggle('text-slate-700', t === tab);
+                btn.classList.toggle('text-slate-400', t !== tab);
+            }
+            if (div) div.style.display = t === tab ? '' : 'none';
+        });
+        const renders = {users:umumRenderUsers, skpd:umumRenderSkpd, jabatan:umumRenderJabatan, lokasi:umumRenderLokasi, kategori:umumRenderKategori};
+        if (renders[tab]) renders[tab]();
+    }
+
+    function umumRenderUsers() {
+        const rc = {Administrator:'indigo','DevOps Engineer':'sky','Lead DevOps':'violet','NOC Operator':'teal','Backend Dev':'emerald','Security Analyst':'red','Viewer':'slate'};
+        const rows = umumData.users.map(u => {
+            const c = rc[u.role] || 'slate';
+            const av = u.nama.split(' ').slice(0,2).map(n=>n[0]).join('');
+            return `<tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-3 py-2.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0" style="background:linear-gradient(135deg,#${['6366f1','0ea5e9','8b5cf6','10b981','f59e0b','ef4444'][umumData.users.indexOf(u)%6]},#${['4f46e5','0284c7','7c3aed','059669','d97706','dc2626'][umumData.users.indexOf(u)%6]})">${av}</div>
+                        <div><div class="text-xs font-black text-slate-800">${u.nama}</div><div class="text-[10px] text-slate-400 font-mono">${u.username}</div></div>
+                    </div>
+                </td>
+                <td class="px-3 py-2.5 text-[10px] text-slate-500">${u.email}</td>
+                <td class="px-3 py-2.5">${_badge(c, u.role)}</td>
+                <td class="px-3 py-2.5 text-[10px] text-slate-500">${u.skpd}</td>
+                <td class="px-3 py-2.5 text-center">${u.mfa ? '<i class="fas fa-check-circle text-emerald-500"></i>' : '<i class="fas fa-times-circle text-slate-300"></i>'}</td>
+                <td class="px-3 py-2.5 text-[10px] text-slate-400">${u.last_login}</td>
+                <td class="px-3 py-2.5">${_badge(u.status === 'active' ? 'emerald' : 'slate', u.status)}</td>
+                <td class="px-3 py-2.5">
+                    <div class="flex gap-1">
+                        <button onclick="umumOpenEditUser('${u.id}')" class="px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-pen mr-1"></i>Edit</button>
+                        <button onclick="umumResetPassword('${u.id}')" class="px-2 py-1 text-[10px] font-black text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-200"><i class="fas fa-key mr-1"></i>Reset</button>
+                        <button onclick="umumToggleUser('${u.id}')" class="px-2 py-1 text-[10px] font-black text-${u.status==='active'?'red':'emerald'}-500 hover:bg-${u.status==='active'?'red':'emerald'}-50 rounded-lg border border-${u.status==='active'?'red':'emerald'}-200"><i class="fas fa-power-off mr-1"></i>${u.status==='active'?'Nonaktif':'Aktifkan'}</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+        document.getElementById('umum-tab-users').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">Daftar Pengguna (${umumData.users.length})</div>
+                <button onclick="umumOpenAddUser()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Pengguna</button>
+            </div>
+            ${_tblWrap(['Pengguna','Email','Role','SKPD','MFA','Terakhir Login','Status','Aksi'], rows)}`;
+    }
+
+    function umumOpenAddUser() {
+        const roles = [{v:'Administrator',l:'Administrator'},{v:'DevOps Engineer',l:'DevOps Engineer'},{v:'Lead DevOps',l:'Lead DevOps'},{v:'NOC Operator',l:'NOC Operator'},{v:'Backend Dev',l:'Backend Dev'},{v:'Security Analyst',l:'Security Analyst'},{v:'Viewer',l:'Viewer'}];
+        const skpds = umumData.skpd.map(s=>({v:s.nama, l:s.singkatan+' — '+s.nama}));
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2"><i class="fas fa-user-plus text-slate-500"></i><span class="font-black text-slate-800">Tambah Pengguna Baru</span></div>
+                <button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times text-sm"></i></button>
+            </div>
+            <div class="space-y-3">
+                ${_formGroup('Nama Lengkap', _inp('u-nama','','Nama lengkap pengguna'))}
+                ${_formGroup('Username', _inp('u-username','','nama.pengguna'))}
+                ${_formGroup('Email', _inp('u-email','','nama@jabarprov.go.id','email'))}
+                ${_formGroup('Password Awal', _inp('u-pass','','Minimal 8 karakter','password'))}
+                ${_formGroup('Role', _sel('u-role', roles))}
+                ${_formGroup('SKPD / Unit', _sel('u-skpd', skpds))}
+                <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" id="u-mfa" class="rounded"><span>Wajibkan MFA</span></label>
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveUser()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg shadow-sm">Simpan</button>
+            </div>`);
+    }
+
+    function umumOpenEditUser(id) {
+        const u = umumData.users.find(x => x.id === id); if (!u) return;
+        const roles = [{v:'Administrator',l:'Administrator'},{v:'DevOps Engineer',l:'DevOps Engineer'},{v:'Lead DevOps',l:'Lead DevOps'},{v:'NOC Operator',l:'NOC Operator'},{v:'Backend Dev',l:'Backend Dev'},{v:'Security Analyst',l:'Security Analyst'},{v:'Viewer',l:'Viewer'}];
+        const skpds = umumData.skpd.map(s=>({v:s.nama, l:s.singkatan+' — '+s.nama}));
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2"><i class="fas fa-user-pen text-slate-500"></i><span class="font-black text-slate-800">Edit Pengguna — ${u.nama}</span></div>
+                <button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times text-sm"></i></button>
+            </div>
+            <input type="hidden" id="u-edit-id" value="${u.id}">
+            <div class="space-y-3">
+                ${_formGroup('Nama Lengkap', _inp('u-nama', u.nama, ''))}
+                ${_formGroup('Username', _inp('u-username', u.username, ''))}
+                ${_formGroup('Email', _inp('u-email', u.email, '', 'email'))}
+                ${_formGroup('Role', _sel('u-role', roles, u.role))}
+                ${_formGroup('SKPD / Unit', _sel('u-skpd', skpds, u.skpd))}
+                ${_formGroup('Status', _sel('u-status', [{v:'active',l:'Aktif'},{v:'inactive',l:'Nonaktif'}], u.status))}
+                <label class="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" id="u-mfa" class="rounded" ${u.mfa?'checked':''}><span>Wajibkan MFA</span></label>
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveEditUser()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg shadow-sm">Simpan</button>
+            </div>`);
+    }
+
+    function umumSaveUser() {
+        const newId = 'USR-' + String(umumData.users.length+1).padStart(3,'0');
+        umumData.users.push({id:newId, nama:document.getElementById('u-nama').value||'Pengguna Baru', username:document.getElementById('u-username').value||'pengguna.baru', email:document.getElementById('u-email').value||'', role:document.getElementById('u-role').value, skpd:document.getElementById('u-skpd').value, status:'active', last_login:'Belum login', mfa:document.getElementById('u-mfa').checked});
+        umumCloseModal(); umumRenderUsers();
+    }
+    function umumSaveEditUser() {
+        const id = document.getElementById('u-edit-id').value;
+        const u = umumData.users.find(x=>x.id===id); if (!u) return;
+        u.nama=document.getElementById('u-nama').value; u.username=document.getElementById('u-username').value; u.email=document.getElementById('u-email').value; u.role=document.getElementById('u-role').value; u.skpd=document.getElementById('u-skpd').value; u.status=document.getElementById('u-status').value; u.mfa=document.getElementById('u-mfa').checked;
+        umumCloseModal(); umumRenderUsers();
+    }
+    function umumResetPassword(id) { const u = umumData.users.find(x=>x.id===id); if (!u) return; alert('Password untuk "'+u.nama+'" telah di-reset. Link pembuatan password baru dikirim ke '+u.email); }
+    function umumToggleUser(id) { const u = umumData.users.find(x=>x.id===id); if (!u) return; u.status = u.status==='active'?'inactive':'active'; umumRenderUsers(); }
+
+    function umumRenderSkpd() {
+        const rows = umumData.skpd.map(s => `<tr class="hover:bg-slate-50">
+            <td class="px-3 py-2.5 font-semibold text-slate-400">${s.id}</td>
+            <td class="px-3 py-2.5"><div class="font-black text-slate-800">${s.nama}</div><div class="text-[10px] font-mono text-slate-400">${s.singkatan}</div></td>
+            <td class="px-3 py-2.5 text-slate-500">${s.kota}</td>
+            <td class="px-3 py-2.5 text-slate-600 text-[10px]">${s.kepala}</td>
+            <td class="px-3 py-2.5 font-mono text-slate-500 text-[10px]">${s.kontak}</td>
+            <td class="px-3 py-2.5">${_badge(s.status==='active'?'emerald':'slate', s.status)}</td>
+            <td class="px-3 py-2.5"><div class="flex gap-1">
+                <button onclick="umumOpenEditSkpd('${s.id}')" class="px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-pen mr-1"></i>Edit</button>
+                <button onclick="umumDeleteSkpd('${s.id}')" class="px-2 py-1 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-lg border border-red-200"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`).join('');
+        document.getElementById('umum-tab-skpd').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">Perangkat Daerah (${umumData.skpd.length})</div>
+                <button onclick="umumOpenAddSkpd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah SKPD</button>
+            </div>
+            ${_tblWrap(['ID','Nama SKPD','Kota/Kab','Kepala','Kontak','Status','Aksi'], rows)}`;
+    }
+    function umumOpenAddSkpd() {
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Tambah Perangkat Daerah</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <div class="space-y-3">
+                ${_formGroup('Nama SKPD', _inp('sk-nama','','Nama lengkap SKPD'))}
+                ${_formGroup('Singkatan', _inp('sk-sing','','Diskominfo'))}
+                ${_formGroup('Kota/Kabupaten', _inp('sk-kota','','Bandung'))}
+                ${_formGroup('Kepala SKPD', _inp('sk-kepala','','Dr. Nama, MM'))}
+                ${_formGroup('Kontak', _inp('sk-kontak','','022-xxxxxxx'))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveSkpd()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumOpenEditSkpd(id) {
+        const s = umumData.skpd.find(x=>x.id===id); if (!s) return;
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Edit SKPD — ${s.singkatan}</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <input type="hidden" id="sk-edit-id" value="${s.id}">
+            <div class="space-y-3">
+                ${_formGroup('Nama SKPD', _inp('sk-nama', s.nama, ''))}
+                ${_formGroup('Singkatan', _inp('sk-sing', s.singkatan, ''))}
+                ${_formGroup('Kota/Kabupaten', _inp('sk-kota', s.kota, ''))}
+                ${_formGroup('Kepala SKPD', _inp('sk-kepala', s.kepala, ''))}
+                ${_formGroup('Kontak', _inp('sk-kontak', s.kontak, ''))}
+                ${_formGroup('Status', _sel('sk-status', [{v:'active',l:'Aktif'},{v:'inactive',l:'Nonaktif'}], s.status))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveEditSkpd()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumSaveSkpd() { const newId='SKPD-'+String(umumData.skpd.length+1).padStart(3,'0'); umumData.skpd.push({id:newId,nama:document.getElementById('sk-nama').value||'SKPD Baru',singkatan:document.getElementById('sk-sing').value||'-',kota:document.getElementById('sk-kota').value||'-',kepala:document.getElementById('sk-kepala').value||'-',kontak:document.getElementById('sk-kontak').value||'-',status:'active'}); umumCloseModal(); umumRenderSkpd(); }
+    function umumSaveEditSkpd() { const id=document.getElementById('sk-edit-id').value; const s=umumData.skpd.find(x=>x.id===id); if(!s) return; s.nama=document.getElementById('sk-nama').value; s.singkatan=document.getElementById('sk-sing').value; s.kota=document.getElementById('sk-kota').value; s.kepala=document.getElementById('sk-kepala').value; s.kontak=document.getElementById('sk-kontak').value; s.status=document.getElementById('sk-status').value; umumCloseModal(); umumRenderSkpd(); }
+    function umumDeleteSkpd(id) { if(!confirm('Hapus SKPD ini?')) return; umumData.skpd=umumData.skpd.filter(s=>s.id!==id); umumRenderSkpd(); }
+
+    function umumRenderJabatan() {
+        const rows = umumData.jabatan.map(j => `<tr class="hover:bg-slate-50">
+            <td class="px-3 py-2.5 font-semibold text-slate-400">${j.id}</td>
+            <td class="px-3 py-2.5 font-black text-slate-800">${j.nama}</td>
+            <td class="px-3 py-2.5">${_badge(j.level==='Struktural'?'indigo':j.level==='Fungsional'?'sky':'slate', j.level)}</td>
+            <td class="px-3 py-2.5">${_badge('violet', j.grup)}</td>
+            <td class="px-3 py-2.5 text-slate-500 text-[10px]">${j.keterangan}</td>
+            <td class="px-3 py-2.5"><div class="flex gap-1">
+                <button onclick="umumOpenEditJabatan('${j.id}')" class="px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-pen mr-1"></i>Edit</button>
+                <button onclick="umumDeleteJabatan('${j.id}')" class="px-2 py-1 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-lg border border-red-200"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`).join('');
+        document.getElementById('umum-tab-jabatan').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">Master Jabatan (${umumData.jabatan.length})</div>
+                <button onclick="umumOpenAddJabatan()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Jabatan</button>
+            </div>
+            ${_tblWrap(['ID','Nama Jabatan','Level','Grup','Keterangan','Aksi'], rows)}`;
+    }
+    function umumOpenAddJabatan() {
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Tambah Jabatan</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <div class="space-y-3">
+                ${_formGroup('Nama Jabatan', _inp('jb-nama','','Nama jabatan/role'))}
+                ${_formGroup('Level', _sel('jb-level',[{v:'Struktural',l:'Struktural'},{v:'Fungsional',l:'Fungsional'},{v:'Non-Struktural',l:'Non-Struktural'}]))}
+                ${_formGroup('Grup', _inp('jb-grup','','IT / Development / Security / Umum'))}
+                ${_formGroup('Keterangan', _textarea('jb-ket','','Deskripsi jabatan dan akses'))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveJabatan()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumOpenEditJabatan(id) {
+        const j = umumData.jabatan.find(x=>x.id===id); if (!j) return;
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Edit Jabatan — ${j.nama}</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <input type="hidden" id="jb-edit-id" value="${j.id}">
+            <div class="space-y-3">
+                ${_formGroup('Nama Jabatan', _inp('jb-nama', j.nama, ''))}
+                ${_formGroup('Level', _sel('jb-level',[{v:'Struktural',l:'Struktural'},{v:'Fungsional',l:'Fungsional'},{v:'Non-Struktural',l:'Non-Struktural'}], j.level))}
+                ${_formGroup('Grup', _inp('jb-grup', j.grup, ''))}
+                ${_formGroup('Keterangan', _textarea('jb-ket', j.keterangan, ''))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveEditJabatan()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumSaveJabatan() { const newId='JBT-'+String(umumData.jabatan.length+1).padStart(3,'0'); umumData.jabatan.push({id:newId,nama:document.getElementById('jb-nama').value||'Jabatan Baru',level:document.getElementById('jb-level').value,grup:document.getElementById('jb-grup').value||'Umum',keterangan:document.getElementById('jb-ket').value||'-'}); umumCloseModal(); umumRenderJabatan(); }
+    function umumSaveEditJabatan() { const id=document.getElementById('jb-edit-id').value; const j=umumData.jabatan.find(x=>x.id===id); if(!j) return; j.nama=document.getElementById('jb-nama').value; j.level=document.getElementById('jb-level').value; j.grup=document.getElementById('jb-grup').value; j.keterangan=document.getElementById('jb-ket').value; umumCloseModal(); umumRenderJabatan(); }
+    function umumDeleteJabatan(id) { if(!confirm('Hapus jabatan ini?')) return; umumData.jabatan=umumData.jabatan.filter(j=>j.id!==id); umumRenderJabatan(); }
+
+    function umumRenderLokasi() {
+        const tc = {'Data Center':'indigo','Server Room':'sky','Disaster Recovery':'orange','NOC':'teal'};
+        const rows = umumData.lokasi.map(l => `<tr class="hover:bg-slate-50">
+            <td class="px-3 py-2.5 font-semibold text-slate-400">${l.id}</td>
+            <td class="px-3 py-2.5 font-black text-slate-800">${l.nama}</td>
+            <td class="px-3 py-2.5 text-slate-500 text-[10px]">${l.alamat}</td>
+            <td class="px-3 py-2.5 text-center text-slate-600">Lantai ${l.lantai}</td>
+            <td class="px-3 py-2.5 text-center text-slate-600">${l.kapasitas} rack</td>
+            <td class="px-3 py-2.5">${_badge(tc[l.tipe]||'slate', l.tipe)}</td>
+            <td class="px-3 py-2.5">${_badge(l.status==='active'?'emerald':'slate', l.status)}</td>
+            <td class="px-3 py-2.5"><div class="flex gap-1">
+                <button onclick="umumOpenEditLokasi('${l.id}')" class="px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-pen mr-1"></i>Edit</button>
+                <button onclick="umumDeleteLokasi('${l.id}')" class="px-2 py-1 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-lg border border-red-200"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`).join('');
+        document.getElementById('umum-tab-lokasi').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">Master Lokasi / Gedung (${umumData.lokasi.length})</div>
+                <button onclick="umumOpenAddLokasi()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Lokasi</button>
+            </div>
+            ${_tblWrap(['ID','Nama Lokasi','Alamat','Lantai','Kapasitas','Tipe','Status','Aksi'], rows)}`;
+    }
+    function umumOpenAddLokasi() {
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Tambah Lokasi / Gedung</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <div class="space-y-3">
+                ${_formGroup('Nama Lokasi', _inp('lk-nama','','Nama gedung/lokasi'))}
+                ${_formGroup('Alamat', _inp('lk-alamat','','Jl. ...'))}
+                ${_formGroup('Lantai', _inp('lk-lantai','1','1','number'))}
+                ${_formGroup('Kapasitas (rack)', _inp('lk-kap','10','10','number'))}
+                ${_formGroup('Tipe', _sel('lk-tipe',[{v:'Data Center',l:'Data Center'},{v:'Server Room',l:'Server Room'},{v:'Disaster Recovery',l:'Disaster Recovery'},{v:'NOC',l:'NOC'}]))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveLokasi()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumOpenEditLokasi(id) {
+        const l = umumData.lokasi.find(x=>x.id===id); if (!l) return;
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Edit Lokasi — ${l.nama}</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <input type="hidden" id="lk-edit-id" value="${l.id}">
+            <div class="space-y-3">
+                ${_formGroup('Nama Lokasi', _inp('lk-nama', l.nama, ''))}
+                ${_formGroup('Alamat', _inp('lk-alamat', l.alamat, ''))}
+                ${_formGroup('Lantai', _inp('lk-lantai', l.lantai, '', 'number'))}
+                ${_formGroup('Kapasitas (rack)', _inp('lk-kap', l.kapasitas, '', 'number'))}
+                ${_formGroup('Tipe', _sel('lk-tipe',[{v:'Data Center',l:'Data Center'},{v:'Server Room',l:'Server Room'},{v:'Disaster Recovery',l:'Disaster Recovery'},{v:'NOC',l:'NOC'}], l.tipe))}
+                ${_formGroup('Status', _sel('lk-status',[{v:'active',l:'Aktif'},{v:'inactive',l:'Nonaktif'}], l.status))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveEditLokasi()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumSaveLokasi() { const newId='LOK-'+String(umumData.lokasi.length+1).padStart(3,'0'); umumData.lokasi.push({id:newId,nama:document.getElementById('lk-nama').value||'Lokasi Baru',alamat:document.getElementById('lk-alamat').value||'-',lantai:document.getElementById('lk-lantai').value||'1',kapasitas:+document.getElementById('lk-kap').value||10,tipe:document.getElementById('lk-tipe').value,status:'active'}); umumCloseModal(); umumRenderLokasi(); }
+    function umumSaveEditLokasi() { const id=document.getElementById('lk-edit-id').value; const l=umumData.lokasi.find(x=>x.id===id); if(!l) return; l.nama=document.getElementById('lk-nama').value; l.alamat=document.getElementById('lk-alamat').value; l.lantai=document.getElementById('lk-lantai').value; l.kapasitas=+document.getElementById('lk-kap').value; l.tipe=document.getElementById('lk-tipe').value; l.status=document.getElementById('lk-status').value; umumCloseModal(); umumRenderLokasi(); }
+    function umumDeleteLokasi(id) { if(!confirm('Hapus lokasi ini?')) return; umumData.lokasi=umumData.lokasi.filter(l=>l.id!==id); umumRenderLokasi(); }
+
+    function umumRenderKategori() {
+        const rows = umumData.kategori.map(k => `<tr class="hover:bg-slate-50">
+            <td class="px-3 py-2.5 font-semibold text-slate-400">${k.id}</td>
+            <td class="px-3 py-2.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-${k.warna}-100 flex items-center justify-center"><i class="fas ${k.ikon} text-${k.warna}-600 text-xs"></i></div>
+                    <span class="font-black text-slate-800">${k.nama}</span>
+                </div>
+            </td>
+            <td class="px-3 py-2.5 text-slate-500 text-[10px]">${k.keterangan}</td>
+            <td class="px-3 py-2.5 text-center"><span class="font-black text-slate-700">${k.sla_jam} jam</span></td>
+            <td class="px-3 py-2.5"><div class="flex gap-1">
+                <button onclick="umumOpenEditKategori('${k.id}')" class="px-2 py-1 text-[10px] font-black text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-pen mr-1"></i>Edit</button>
+                <button onclick="umumDeleteKategori('${k.id}')" class="px-2 py-1 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-lg border border-red-200"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`).join('');
+        document.getElementById('umum-tab-kategori').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">Kategori Layanan (${umumData.kategori.length})</div>
+                <button onclick="umumOpenAddKategori()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Kategori</button>
+            </div>
+            ${_tblWrap(['ID','Nama Kategori','Keterangan','SLA Default','Aksi'], rows)}`;
+    }
+    function umumOpenAddKategori() {
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Tambah Kategori Layanan</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <div class="space-y-3">
+                ${_formGroup('Nama Kategori', _inp('kt-nama','','Nama kategori layanan'))}
+                ${_formGroup('Icon Font Awesome', _inp('kt-ikon','fa-circle','fa-server, fa-network-wired, dll'))}
+                ${_formGroup('Warna', _sel('kt-warna',[{v:'sky',l:'Biru (sky)'},{v:'indigo',l:'Indigo'},{v:'violet',l:'Violet'},{v:'red',l:'Merah'},{v:'amber',l:'Kuning'},{v:'emerald',l:'Hijau'},{v:'slate',l:'Abu-abu'}]))}
+                ${_formGroup('Keterangan', _textarea('kt-ket','','Deskripsi kategori layanan ini'))}
+                ${_formGroup('SLA Default (jam)', _inp('kt-sla','8','8','number'))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveKategori()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumOpenEditKategori(id) {
+        const k = umumData.kategori.find(x=>x.id===id); if (!k) return;
+        _mgmtShowModal('umum-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Edit Kategori — ${k.nama}</div><button onclick="umumCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <input type="hidden" id="kt-edit-id" value="${k.id}">
+            <div class="space-y-3">
+                ${_formGroup('Nama Kategori', _inp('kt-nama', k.nama, ''))}
+                ${_formGroup('Icon Font Awesome', _inp('kt-ikon', k.ikon, ''))}
+                ${_formGroup('Warna', _sel('kt-warna',[{v:'sky',l:'Biru (sky)'},{v:'indigo',l:'Indigo'},{v:'violet',l:'Violet'},{v:'red',l:'Merah'},{v:'amber',l:'Kuning'},{v:'emerald',l:'Hijau'},{v:'slate',l:'Abu-abu'}], k.warna))}
+                ${_formGroup('Keterangan', _textarea('kt-ket', k.keterangan, ''))}
+                ${_formGroup('SLA Default (jam)', _inp('kt-sla', k.sla_jam, '', 'number'))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="umumCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="umumSaveEditKategori()" class="px-4 py-2 text-xs font-black text-white bg-slate-700 hover:bg-slate-800 rounded-lg">Simpan</button>
+            </div>`);
+    }
+    function umumSaveKategori() { const newId='KAT-'+String(umumData.kategori.length+1).padStart(3,'0'); umumData.kategori.push({id:newId,nama:document.getElementById('kt-nama').value||'Kategori Baru',ikon:document.getElementById('kt-ikon').value||'fa-circle',warna:document.getElementById('kt-warna').value,keterangan:document.getElementById('kt-ket').value||'-',sla_jam:+document.getElementById('kt-sla').value||8}); umumCloseModal(); umumRenderKategori(); }
+    function umumSaveEditKategori() { const id=document.getElementById('kt-edit-id').value; const k=umumData.kategori.find(x=>x.id===id); if(!k) return; k.nama=document.getElementById('kt-nama').value; k.ikon=document.getElementById('kt-ikon').value; k.warna=document.getElementById('kt-warna').value; k.keterangan=document.getElementById('kt-ket').value; k.sla_jam=+document.getElementById('kt-sla').value; umumCloseModal(); umumRenderKategori(); }
+    function umumDeleteKategori(id) { if(!confirm('Hapus kategori ini?')) return; umumData.kategori=umumData.kategori.filter(k=>k.id!==id); umumRenderKategori(); }
+    function umumCloseModal() { _mgmtCloseModal('umum-modal-ov'); }
+
+    // ════════════════════════════════════════
+    // PENGATURAN — SISTEM
+    // ════════════════════════════════════════
+    let sistemCurrentTab = 'smtp';
+    let sistemInitialized = false;
+
+    const sistemConfig = {
+        smtp: { host:'smtp.jabarprov.go.id', port:587, encryption:'TLS', username:'noreply@jabarprov.go.id', password:'', from_name:'JabarCloud DCIM', from_email:'noreply@jabarprov.go.id', status:'active' },
+        domain: { app_url:'https://dcim.jabarprov.go.id', cdn_url:'https://cdn.jabarprov.go.id', api_url:'https://api.dcim.jabarprov.go.id', cors_origins:'https://jabarprov.go.id,https://diskominfo.jabarprov.go.id', force_https:true, maintenance_mode:false },
+        sso: { provider:'SAML 2.0', idp_entity_id:'https://sso.jabarprov.go.id/idp', idp_sso_url:'https://sso.jabarprov.go.id/saml/sso', idp_sls_url:'https://sso.jabarprov.go.id/saml/sls', sp_entity_id:'https://dcim.jabarprov.go.id/saml/metadata', attribute_username:'uid', attribute_email:'mail', attribute_fullname:'cn', enabled:true, auto_create_user:true },
+        api_keys: [
+            {id:'API-001', name:'Monitoring Integration', key:'dcim_live_xK9...mQ2', scope:'monitoring:read,alerts:read', created:'01 Jan 2026', last_used:'31 Mar 2026', expires:'31 Des 2026', status:'active'},
+            {id:'API-002', name:'GitLab Webhook',         key:'dcim_live_pR3...nL8', scope:'pipeline:write,cicd:read',    created:'15 Jan 2026', last_used:'31 Mar 2026', expires:'never',      status:'active'},
+            {id:'API-003', name:'SIEM Integration',       key:'dcim_live_bT7...vX4', scope:'audit:read,security:read',    created:'01 Feb 2026', last_used:'28 Mar 2026', expires:'01 Feb 2027', status:'active'},
+            {id:'API-004', name:'Legacy Connector v1',    key:'dcim_live_aZ2...kW9', scope:'full:read',                   created:'01 Oct 2025', last_used:'10 Jan 2026', expires:'01 Apr 2026', status:'revoked'},
+        ],
+        backup: { schedule:'Setiap hari 02:00 WIB', retention_days:30, storage:'MinIO S3 (s3://dcim-backup)', last_backup:'31 Mar 2026 02:05', last_status:'success', size_last:'2.4 GB', total_size:'48.6 GB', notify_email:'admin@jabarprov.go.id' },
+    };
+
+    function sistemInit() {
+        if (!sistemInitialized) sistemInitialized = true;
+        sistemSwitchTab(sistemCurrentTab);
+    }
+
+    function sistemSwitchTab(tab) {
+        sistemCurrentTab = tab;
+        ['smtp','domain','sso','api','backup','tentang'].forEach(t => {
+            const btn = document.getElementById('sistem-tab-btn-' + t);
+            const div = document.getElementById('sistem-tab-' + t);
+            if (btn) { btn.classList.toggle('border-b-2',t===tab); btn.classList.toggle('border-blue-700',t===tab); btn.classList.toggle('text-blue-700',t===tab); btn.classList.toggle('text-slate-400',t!==tab); }
+            if (div) div.style.display = t === tab ? '' : 'none';
+        });
+        const renders = {smtp:sistemRenderSmtp, domain:sistemRenderDomain, sso:sistemRenderSso, api:sistemRenderApi, backup:sistemRenderBackup, tentang:sistemRenderTentang};
+        if (renders[tab]) renders[tab]();
+    }
+
+    function _cfgSection(title, icon, color, content) {
+        return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-4">
+            <div class="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100">
+                <div class="w-7 h-7 rounded-lg bg-${color}-100 flex items-center justify-center"><i class="fas ${icon} text-${color}-600 text-xs"></i></div>
+                <span class="font-black text-slate-700 text-sm">${title}</span>
+            </div>
+            <div class="p-5">${content}</div>
+        </div>`;
+    }
+    function _cfgRow(label, inputHtml, hint='') {
+        return `<div class="grid grid-cols-3 gap-4 items-start py-3 border-b border-slate-50 last:border-0">
+            <div><div class="text-xs font-black text-slate-600">${label}</div>${hint?`<div class="text-[10px] text-slate-400 mt-0.5">${hint}</div>`:''}</div>
+            <div class="col-span-2">${inputHtml}</div>
+        </div>`;
+    }
+    function _cfgInp(id, val, ph='', type='text') {
+        return `<input id="${id}" value="${val}" placeholder="${ph}" type="${type}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 font-mono">`;
+    }
+    function _cfgSel(id, opts, val) {
+        return `<select id="${id}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400">${opts.map(o=>`<option value="${o.v}" ${o.v===val?'selected':''}>${o.l}</option>`).join('')}</select>`;
+    }
+    function _cfgToggle(id, val, label) {
+        return `<label class="flex items-center gap-2 cursor-pointer"><div class="relative"><input type="checkbox" id="${id}" class="sr-only" ${val?'checked':''}><div class="w-10 h-5 rounded-full transition-colors ${val?'bg-blue-600':'bg-slate-200'}"></div><div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${val?'translate-x-5':''}"></div></div><span class="text-xs text-slate-600">${label}</span></label>`;
+    }
+
+    function sistemRenderSmtp() {
+        const c = sistemConfig.smtp;
+        document.getElementById('sistem-tab-smtp').innerHTML = `
+            ${_cfgSection('Konfigurasi SMTP', 'fa-envelope', 'sky',
+                _cfgRow('Host SMTP', _cfgInp('smtp-host', c.host, 'smtp.example.com'), 'Server SMTP untuk pengiriman email') +
+                _cfgRow('Port', _cfgInp('smtp-port', c.port, '587', 'number'), '') +
+                _cfgRow('Enkripsi', _cfgSel('smtp-enc', [{v:'TLS',l:'TLS (STARTTLS)'},{v:'SSL',l:'SSL'},{v:'none',l:'None'}], c.encryption), '') +
+                _cfgRow('Username', _cfgInp('smtp-user', c.username, 'noreply@domain.go.id'), '') +
+                _cfgRow('Password', _cfgInp('smtp-pass', '', '••••••••', 'password'), 'Kosongkan jika tidak diubah') +
+                _cfgRow('Nama Pengirim', _cfgInp('smtp-fname', c.from_name, 'JabarCloud DCIM'), '') +
+                _cfgRow('Email Pengirim', _cfgInp('smtp-femail', c.from_email, 'noreply@domain.go.id'), '')
+            )}
+            <div class="flex gap-2 justify-end">
+                <button onclick="sistemTestSmtp()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-sky-600 hover:bg-sky-50 rounded-lg border border-sky-200"><i class="fas fa-paper-plane text-[10px]"></i>Kirim Email Test</button>
+                <button onclick="sistemSaveSmtp()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan</button>
+            </div>`;
+    }
+
+    function sistemRenderDomain() {
+        const c = sistemConfig.domain;
+        document.getElementById('sistem-tab-domain').innerHTML = `
+            ${_cfgSection('Konfigurasi Domain & URL', 'fa-globe', 'violet',
+                _cfgRow('URL Aplikasi', _cfgInp('dom-app', c.app_url, 'https://dcim.jabarprov.go.id'), 'URL utama aplikasi DCIM') +
+                _cfgRow('CDN URL', _cfgInp('dom-cdn', c.cdn_url, 'https://cdn.domain.go.id'), 'URL untuk static assets') +
+                _cfgRow('API Base URL', _cfgInp('dom-api', c.api_url, 'https://api.dcim.jabarprov.go.id'), 'Base URL untuk REST API') +
+                _cfgRow('CORS Origins', _cfgInp('dom-cors', c.cors_origins, 'https://domain1.go.id,https://domain2.go.id'), 'Pisahkan dengan koma')
+            )}
+            ${_cfgSection('Keamanan', 'fa-lock', 'emerald',
+                _cfgRow('Force HTTPS', _cfgToggle('dom-https', c.force_https, 'Redirect semua HTTP ke HTTPS'), '') +
+                _cfgRow('Maintenance Mode', _cfgToggle('dom-maint', c.maintenance_mode, 'Tampilkan halaman maintenance'), 'Semua pengguna akan melihat halaman maintenance')
+            )}
+            <div class="flex justify-end">
+                <button onclick="sistemSaveDomain()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan</button>
+            </div>`;
+    }
+
+    function sistemRenderSso() {
+        const c = sistemConfig.sso;
+        document.getElementById('sistem-tab-sso').innerHTML = `
+            ${_cfgSection('Single Sign-On (SSO)', 'fa-key', 'amber',
+                _cfgRow('Status SSO', _cfgToggle('sso-enabled', c.enabled, 'Aktifkan SSO untuk semua pengguna'), '') +
+                _cfgRow('Provider', _cfgSel('sso-provider', [{v:'SAML 2.0',l:'SAML 2.0'},{v:'OAuth 2.0',l:'OAuth 2.0'},{v:'OIDC',l:'OpenID Connect'}], c.provider), '')
+            )}
+            ${_cfgSection('Identity Provider (IdP)', 'fa-id-card', 'indigo',
+                _cfgRow('IdP Entity ID', _cfgInp('sso-idp-entity', c.idp_entity_id, 'https://sso.domain.go.id/idp'), '') +
+                _cfgRow('SSO URL', _cfgInp('sso-idp-sso', c.idp_sso_url, 'https://sso.domain.go.id/saml/sso'), '') +
+                _cfgRow('SLS URL', _cfgInp('sso-idp-sls', c.idp_sls_url, 'https://sso.domain.go.id/saml/sls'), '') +
+                _cfgRow('SP Entity ID', _cfgInp('sso-sp-entity', c.sp_entity_id, 'https://app.domain.go.id/saml/metadata'), 'URL metadata Service Provider')
+            )}
+            ${_cfgSection('Pemetaan Atribut', 'fa-arrows-left-right', 'teal',
+                _cfgRow('Atribut Username', _cfgInp('sso-attr-user', c.attribute_username, 'uid'), '') +
+                _cfgRow('Atribut Email', _cfgInp('sso-attr-email', c.attribute_email, 'mail'), '') +
+                _cfgRow('Atribut Nama Lengkap', _cfgInp('sso-attr-name', c.attribute_fullname, 'cn'), '') +
+                _cfgRow('Auto Create User', _cfgToggle('sso-auto-create', c.auto_create_user, 'Buat akun otomatis saat pertama login via SSO'), '')
+            )}
+            <div class="flex gap-2 justify-end">
+                <button onclick="sistemTestSso()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-200"><i class="fas fa-flask text-[10px]"></i>Test Koneksi SSO</button>
+                <button onclick="sistemSaveSso()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan</button>
+            </div>`;
+    }
+
+    function sistemRenderApi() {
+        const sc = {active:'emerald', revoked:'red'};
+        const rows = sistemConfig.api_keys.map(k => `<tr class="hover:bg-slate-50">
+            <td class="px-3 py-2.5 font-black text-slate-800">${k.name}</td>
+            <td class="px-3 py-2.5 font-mono text-slate-500 text-[10px]">${k.key}</td>
+            <td class="px-3 py-2.5 text-[10px] text-slate-400">${k.scope.split(',').map(s=>`<span class="inline-block bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono text-[9px] mr-0.5">${s.trim()}</span>`).join('')}</td>
+            <td class="px-3 py-2.5 text-slate-400 text-[10px]">${k.last_used}</td>
+            <td class="px-3 py-2.5 text-slate-400 text-[10px]">${k.expires}</td>
+            <td class="px-3 py-2.5">${_badge(sc[k.status]||'slate', k.status)}</td>
+            <td class="px-3 py-2.5"><div class="flex gap-1">
+                ${k.status==='active'?`<button onclick="sistemRevokeKey('${k.id}')" class="px-2 py-1 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-lg border border-red-200"><i class="fas fa-ban mr-1"></i>Revoke</button>`:''}
+                <button onclick="sistemDeleteKey('${k.id}')" class="px-2 py-1 text-[10px] font-black text-slate-400 hover:bg-slate-100 rounded-lg border border-slate-200"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`).join('');
+        document.getElementById('sistem-tab-api').innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-black text-slate-500 uppercase tracking-wide">API Keys (${sistemConfig.api_keys.length})</div>
+                <button onclick="sistemOpenAddKey()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Generate API Key</button>
+            </div>
+            ${_tblWrap(['Nama','API Key','Scope','Terakhir Digunakan','Expires','Status','Aksi'], rows)}
+            <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i>
+                <div class="text-[10px] text-amber-700">API Key hanya ditampilkan sekali saat pertama dibuat. Simpan dengan aman. Jangan bagikan API Key ke pihak yang tidak berwenang.</div>
+            </div>`;
+    }
+
+    function sistemRenderBackup() {
+        const c = sistemConfig.backup;
+        const statusColor = c.last_status === 'success' ? 'emerald' : 'red';
+        document.getElementById('sistem-tab-backup').innerHTML = `
+            ${_cfgSection('Status Backup Terakhir', 'fa-clock-rotate-left', statusColor,
+                `<div class="grid grid-cols-3 gap-4">
+                    <div class="text-center p-3 bg-${statusColor}-50 rounded-xl border border-${statusColor}-200">
+                        <div class="text-lg font-black text-${statusColor}-700">${c.last_status === 'success' ? 'Berhasil' : 'Gagal'}</div>
+                        <div class="text-[10px] text-${statusColor}-500">${c.last_backup}</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="text-lg font-black text-slate-700">${c.size_last}</div>
+                        <div class="text-[10px] text-slate-400">Ukuran Backup</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="text-lg font-black text-slate-700">${c.total_size}</div>
+                        <div class="text-[10px] text-slate-400">Total Penyimpanan</div>
+                    </div>
+                </div>`
+            )}
+            ${_cfgSection('Jadwal & Konfigurasi Backup', 'fa-calendar-check', 'sky',
+                _cfgRow('Jadwal Backup', _cfgInp('bk-schedule', c.schedule, 'Setiap hari 02:00 WIB'), 'Cron atau deskripsi jadwal') +
+                _cfgRow('Retensi Data (hari)', _cfgInp('bk-ret', c.retention_days, '30', 'number'), 'Backup lebih lama dari ini akan dihapus otomatis') +
+                _cfgRow('Storage Tujuan', _cfgInp('bk-storage', c.storage, 's3://dcim-backup'), 'Path MinIO S3 / NFS / lokal') +
+                _cfgRow('Email Notifikasi', _cfgInp('bk-email', c.notify_email, 'admin@jabarprov.go.id'), 'Notifikasi jika backup gagal')
+            )}
+            ${_cfgSection('Maintenance', 'fa-screwdriver-wrench', 'orange',
+                `<div class="grid grid-cols-2 gap-3">
+                    <button onclick="sistemRunBackup()" class="flex items-center justify-center gap-2 p-3 border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-xl text-xs font-black transition-colors"><i class="fas fa-play-circle"></i>Jalankan Backup Sekarang</button>
+                    <button onclick="sistemClearCache()" class="flex items-center justify-center gap-2 p-3 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-black transition-colors"><i class="fas fa-broom"></i>Bersihkan Cache Aplikasi</button>
+                    <button onclick="sistemOptimizeDb()" class="flex items-center justify-center gap-2 p-3 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-black transition-colors"><i class="fas fa-database"></i>Optimasi Database</button>
+                    <button onclick="sistemDownloadLog()" class="flex items-center justify-center gap-2 p-3 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-black transition-colors"><i class="fas fa-file-arrow-down"></i>Unduh Application Log</button>
+                </div>`
+            )}
+            <div class="flex justify-end">
+                <button onclick="sistemSaveBackup()" class="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan Konfigurasi</button>
+            </div>`;
+    }
+
+    function sistemRenderTentang() {
+        document.getElementById('sistem-tab-tentang').innerHTML = `
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-4">
+                    <div class="px-8 py-10 text-center" style="background:linear-gradient(135deg,#1e3a5f,#1e40af,#0284c7)">
+                        <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-cloud-bolt text-white text-2xl"></i>
+                        </div>
+                        <div class="text-white font-black text-xl mb-1">JabarCloud DCIM</div>
+                        <div class="text-white/70 text-sm">Data Center Infrastructure Management</div>
+                        <div class="mt-3 inline-flex items-center gap-1.5 bg-white/10 text-white/90 text-xs font-mono px-3 py-1 rounded-full">
+                            <i class="fas fa-code-branch text-[10px]"></i>v3.2.1 — Build 20260331
+                        </div>
+                    </div>
+                    <div class="divide-y divide-slate-50">
+                        ${[
+                            ['Versi Aplikasi','3.2.1'],
+                            ['Build Date','31 Maret 2026'],
+                            ['Lingkungan','Production'],
+                            ['PHP Version','8.3.4'],
+                            ['Framework','Laravel 11.x'],
+                            ['Database','PostgreSQL 16.2'],
+                            ['Cache','Redis 7.2'],
+                            ['Storage','MinIO (S3-compatible)'],
+                            ['Lisensi','Pemerintah Provinsi Jawa Barat'],
+                        ].map(([l,v])=>`<div class="flex items-center px-6 py-3">
+                            <div class="text-xs font-black text-slate-500 w-40">${l}</div>
+                            <div class="text-xs font-mono text-slate-700 font-semibold">${v}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <div class="text-xs font-black text-slate-500 uppercase tracking-wide mb-3">Kontak &amp; Dukungan</div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-xs text-slate-600"><i class="fas fa-envelope w-4 text-slate-400"></i>helpdesk@diskominfo.jabarprov.go.id</div>
+                        <div class="flex items-center gap-2 text-xs text-slate-600"><i class="fas fa-phone w-4 text-slate-400"></i>(022) 2032338 ext. 125</div>
+                        <div class="flex items-center gap-2 text-xs text-slate-600"><i class="fas fa-circle-info w-4 text-slate-400"></i>Jam operasional: Senin–Jumat, 08.00–16.00 WIB</div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function sistemSaveAll() { alert('Semua konfigurasi sistem berhasil disimpan.'); }
+    function sistemSaveSmtp() {
+        sistemConfig.smtp.host=document.getElementById('smtp-host').value; sistemConfig.smtp.port=+document.getElementById('smtp-port').value; sistemConfig.smtp.encryption=document.getElementById('smtp-enc').value; sistemConfig.smtp.username=document.getElementById('smtp-user').value; sistemConfig.smtp.from_name=document.getElementById('smtp-fname').value; sistemConfig.smtp.from_email=document.getElementById('smtp-femail').value;
+        alert('Konfigurasi SMTP berhasil disimpan.');
+    }
+    function sistemTestSmtp() { alert('Email test berhasil dikirim ke '+sistemConfig.smtp.from_email+'. Periksa kotak masuk.'); }
+    function sistemSaveDomain() { alert('Konfigurasi domain berhasil disimpan. Perubahan force_https dan maintenance mode aktif segera.'); }
+    function sistemTestSso() { alert('Koneksi ke IdP SSO berhasil. Metadata tervalidasi.'); }
+    function sistemSaveSso() { alert('Konfigurasi SSO berhasil disimpan.'); }
+    function sistemSaveBackup() { alert('Jadwal dan konfigurasi backup berhasil disimpan.'); }
+    function sistemRunBackup() { if(confirm('Jalankan backup sekarang? Proses ini dapat memakan beberapa menit.')) alert('Backup dimulai. Anda akan diberitahu via email setelah selesai.'); }
+    function sistemClearCache() { if(confirm('Bersihkan semua cache aplikasi?')) alert('Cache berhasil dibersihkan. (Redis flush + file cache cleared)'); }
+    function sistemOptimizeDb() { if(confirm('Optimasi database sekarang?')) alert('Optimasi database selesai. (VACUUM ANALYZE PostgreSQL)'); }
+    function sistemDownloadLog() { alert('Unduhan log aplikasi dimulai...'); }
+    function sistemOpenAddKey() {
+        _mgmtShowModal('sistem-modal-ov', `
+            <div class="flex items-center justify-between mb-5"><div class="font-black text-slate-800">Generate API Key Baru</div><button onclick="sistemCloseModal()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"><i class="fas fa-times"></i></button></div>
+            <div class="space-y-3">
+                ${_formGroup('Nama Integrasi', _inp('ak-name','','Contoh: GitLab Webhook'))}
+                ${_formGroup('Scope (pisahkan koma)', _textarea('ak-scope','','monitoring:read, pipeline:write, ...'))}
+                ${_formGroup('Expires', _sel('ak-exp',[{v:'never',l:'Tidak pernah expire'},{v:'30d',l:'30 hari'},{v:'90d',l:'90 hari'},{v:'1y',l:'1 tahun'}]))}
+            </div>
+            <div class="mt-5 flex gap-2 justify-end">
+                <button onclick="sistemCloseModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg border border-slate-200">Batal</button>
+                <button onclick="sistemGenerateKey()" class="px-4 py-2 text-xs font-black text-white bg-blue-700 hover:bg-blue-800 rounded-lg">Generate</button>
+            </div>`);
+    }
+    function sistemGenerateKey() {
+        const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const rnd = n => Array.from({length:n},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+        const newKey = 'dcim_live_'+rnd(3)+'...'+rnd(3);
+        const newId = 'API-'+String(sistemConfig.api_keys.length+1).padStart(3,'0');
+        const exp = document.getElementById('ak-exp').value;
+        const expLabel = exp==='never'?'never':exp==='30d'?'30 hari':exp==='90d'?'90 hari':'1 tahun';
+        sistemConfig.api_keys.push({id:newId,name:document.getElementById('ak-name').value||'New Key',key:newKey,scope:document.getElementById('ak-scope').value||'read',created:new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}),last_used:'Belum digunakan',expires:expLabel,status:'active'});
+        sistemCloseModal();
+        alert('API Key berhasil dibuat:\n\n'+newKey+'\n\nSalin dan simpan dengan aman. Key ini hanya ditampilkan sekali.');
+        sistemRenderApi();
+    }
+    function sistemRevokeKey(id) { if(!confirm('Revoke API Key ini? Integrasi yang menggunakan key ini akan berhenti bekerja.')) return; const k=sistemConfig.api_keys.find(x=>x.id===id); if(k) k.status='revoked'; sistemRenderApi(); }
+    function sistemDeleteKey(id) { if(!confirm('Hapus API Key ini secara permanen?')) return; sistemConfig.api_keys=sistemConfig.api_keys.filter(k=>k.id!==id); sistemRenderApi(); }
+    function sistemCloseModal() { _mgmtCloseModal('sistem-modal-ov'); }
+
     </script>
-</body>
-</html>
 </body>
 </html>
