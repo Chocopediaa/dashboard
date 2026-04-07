@@ -172,8 +172,10 @@
             <!-- HOME -->
             <div>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 px-2">Home</p>
-                <div onclick="showPage('dashboard', this)" class="sidebar-item active flex items-center gap-3 p-3 text-slate-600">
-                    <i class="fas fa-th-large w-5 text-center"></i> Dashboard
+                <div class="space-y-1">
+                    <div onclick="showPage('dashboard', this)" class="sidebar-item active flex items-center gap-3 p-3 text-slate-600">
+                        <i class="fas fa-th-large w-5 text-center"></i> Dashboard
+                    </div>
                 </div>
             </div>
 
@@ -333,12 +335,42 @@
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Diskominfo Jabar Infrastructure</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4 border-l pl-6 border-slate-200">
-                <div class="text-right">
+            <div class="flex items-center gap-4 border-l pl-6 border-slate-200 relative">
+                <div class="text-right cursor-pointer" onclick="toggleAccountMenu()">
                     <p class="text-sm font-extrabold text-slate-800">Administrator</p>
                     <p class="text-[10px] text-indigo-500 font-bold uppercase">Penata Muda (III/a)</p>
                 </div>
-                <img src="https://ui-avatars.com/api/?name=Admin+Jabar&background=4F46E5&color=fff" class="w-11 h-11 rounded-2xl shadow-md border-2 border-white" alt="User">
+                <img src="https://ui-avatars.com/api/?name=Admin+Jabar&background=4F46E5&color=fff" class="w-11 h-11 rounded-2xl shadow-md border-2 border-white cursor-pointer hover:shadow-lg transition-all" onclick="toggleAccountMenu()" alt="User">
+                
+                <!-- Account Dropdown Menu -->
+                <div id="account-menu" class="hidden absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
+                    <div class="p-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white">
+                        <p class="font-extrabold text-slate-800 text-sm">Administrator</p>
+                        <p class="text-[10px] text-slate-400">admin@diskominfo.jabar.go.id</p>
+                    </div>
+                    <div class="py-2">
+                        <button onclick="showAccountInfo()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-user text-indigo-500 text-xs"></i>
+                            </div>
+                            <span class="font-semibold">Informasi Akun</span>
+                        </button>
+                        <button onclick="showAccountSettings()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-gear text-indigo-500 text-xs"></i>
+                            </div>
+                            <span class="font-semibold">Pengaturan Akun</span>
+                        </button>
+                    </div>
+                    <div class="border-t border-slate-100 py-2">
+                        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                                <i class="fas fa-right-from-bracket text-rose-500 text-xs"></i>
+                            </div>
+                            <span class="font-semibold">Keluar</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -1394,15 +1426,13 @@
         <!-- ===== KEBIJAKAN PAGE ===== -->
         <div id="kebijakan-page" style="display:none" class="flex-1 flex flex-col overflow-y-auto">
             <!-- Page header -->
-            <div class="p-6 border-b border-slate-100 bg-white shrink-0">
-                <div class="flex items-center gap-3 mb-1">
-                    <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center">
-                        <i class="fas fa-book-open text-indigo-500 text-sm"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-extrabold text-slate-800">Dokumentasi Kebijakan</h2>
-                        <p class="text-[10px] text-slate-400 font-medium">Kebijakan, prosedur, instruksi kerja, dan formulir resmi</p>
-                    </div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-book-open text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Dokumentasi Kebijakan</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Kebijakan, prosedur, instruksi kerja, dan formulir resmi</p>
                 </div>
             </div>
             <!-- Tab bar -->
@@ -1421,15 +1451,13 @@
         <!-- ===== WBS PAGE ===== -->
         <div id="wbs-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
             <!-- Header bar -->
-            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center gap-4 flex-wrap">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
-                        <i class="fas fa-project-diagram text-indigo-500 text-sm"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-extrabold text-slate-800 leading-tight">Work Breakdown Structure</h2>
-                        <p class="text-[10px] text-slate-400 font-medium">Kalender & manajemen pekerjaan tim infrastruktur</p>
-                    </div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-project-diagram text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Work Breakdown Structure</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Kalender & manajemen pekerjaan tim infrastruktur</p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <div class="flex bg-slate-100 rounded-xl p-1 gap-0.5">
@@ -1573,20 +1601,21 @@
 
         <!-- ===== FORMULIR MAIN PAGE ===== -->
         <div id="formulir-page" style="display:none" class="flex-1 flex flex-col overflow-y-auto bg-slate-50/60">
-            <div class="p-6">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center"><i class="fas fa-file-alt text-indigo-500 text-sm"></i></div>
-                        <div>
-                            <h2 class="text-base font-extrabold text-slate-800">Formulir Dokumen</h2>
-                            <p class="text-[10px] text-slate-400 font-medium">Buat, kelola, dan arsipkan formulir INC · RFC · NOT</p>
-                        </div>
-                    </div>
-                    <button onclick="formulirNewForm(null)" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold px-3 py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-200">
-                        <i class="fas fa-plus text-[10px]"></i> Buat Formulir Baru
-                    </button>
+            <!-- Page header -->
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-file-alt text-indigo-500 text-sm"></i>
                 </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Formulir Dokumen</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Buat, kelola, dan arsipkan formulir INC · RFC · NOT</p>
+                </div>
+                <button onclick="formulirNewForm(null)" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold px-3 py-2 rounded-xl transition-colors shadow-sm shadow-indigo-200">
+                    <i class="fas fa-plus text-[10px]"></i> Buat Formulir Baru
+                </button>
+            </div>
+            <!-- Content -->
+            <div class="p-6">
                 <!-- Stat cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="frm-stat-cards"></div>
                 <!-- Recent list -->
@@ -2100,13 +2129,13 @@
         <!-- PA Firewall page -->
         <div id="nms-fw-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
             <!-- Top bar -->
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">
-                    <i class="fa-solid fa-shield-halved"></i>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-shield-halved text-indigo-500 text-sm"></i>
                 </div>
-                <div>
-                    <div class="font-bold text-slate-800 text-sm">Palo Alto Firewall</div>
-                    <div class="text-xs text-slate-400" id="fw-sync-time">Sinkronisasi: 26 Mar 2026, 14:35:00</div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Palo Alto Firewall</h2>
+                    <p class="text-[10px] text-slate-400 font-medium" id="fw-sync-time">Sinkronisasi: 26 Mar 2026, 14:35:00</p>
                 </div>
                 <div class="ml-4">
                     <select id="fw-device-select" onchange="fwSelectDevice(this.value)" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-red-300"></select>
@@ -2292,13 +2321,13 @@
         <!-- ── Monitoring Fisik page ── -->
         <div id="nms-fisik-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
             <!-- Top bar -->
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#0d9488,#0f766e)">
-                    <i class="fa-solid fa-building-server"></i>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-building-server text-indigo-500 text-sm"></i>
                 </div>
-                <div>
-                    <div class="font-bold text-slate-800 text-sm">Monitoring Fisik</div>
-                    <div class="text-xs text-slate-400">Pusat Data – Gedung Diskominfo Jabar</div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Monitoring Fisik</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Pusat Data – Gedung Diskominfo Jabar</p>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black border border-emerald-200"><i class="fa-solid fa-temperature-half mr-1"></i>Sensor Aktif</span>
@@ -2390,13 +2419,13 @@
              ════════════════════════════════════════════════════════════ -->
         <div id="nms-repository-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
             <!-- Top bar -->
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
-                    <i class="fa-solid fa-code-branch"></i>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-code-branch text-indigo-500 text-sm"></i>
                 </div>
-                <div>
-                    <div class="font-bold text-slate-800 text-sm">Monitoring Repository</div>
-                    <div class="text-xs text-slate-400">CI/CD · Versi · Changelog – Infrastruktur DC Jabar</div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Monitoring Repository</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">CI/CD · Versi · Changelog – Infrastruktur DC Jabar</p>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-black border border-emerald-200"><i class="fa-brands fa-git-alt mr-1"></i>Gitea On-Premise</span>
@@ -2445,9 +2474,14 @@
              DEVOPS — ZONES
              ════════════════════════════════════════════════════════════ -->
         <div id="devops-zones-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="fa-solid fa-layer-group"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">DevOps · Zones</div><div class="text-xs text-slate-400">Manajemen Virtual Network Zones &amp; VPC</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-layer-group text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">DevOps · Zones</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Virtual Network Zones & VPC</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="zones-search" oninput="zonesRender()" placeholder="Cari zone…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-indigo-400">
                     <button onclick="zonesOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Zone</button>
@@ -2464,9 +2498,14 @@
              DEVOPS — CLUSTER
              ════════════════════════════════════════════════════════════ -->
         <div id="devops-cluster-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)"><i class="fa-solid fa-dharmachakra"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">DevOps · Cluster</div><div class="text-xs text-slate-400">Manajemen Kubernetes Cluster &amp; Node</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-dharmachakra text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">DevOps · Cluster</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Kubernetes Cluster & Node</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="cluster-search" oninput="clusterRender()" placeholder="Cari cluster…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-sky-400">
                     <button onclick="clusterOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Cluster</button>
@@ -2483,9 +2522,14 @@
              DEVOPS — HOST
              ════════════════════════════════════════════════════════════ -->
         <div id="devops-host-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fa-solid fa-server"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">DevOps · Host</div><div class="text-xs text-slate-400">Manajemen Host Server &amp; Compute Node</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-server text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">DevOps · Host</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Host Server & Compute Node</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="host-search" oninput="hostRender()" placeholder="Cari host…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-emerald-400">
                     <button onclick="hostOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Host</button>
@@ -2502,9 +2546,14 @@
              DEVOPS — STORAGE
              ════════════════════════════════════════════════════════════ -->
         <div id="devops-storage-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fa-solid fa-database"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">DevOps · Storage</div><div class="text-xs text-slate-400">Manajemen Volume &amp; Storage Pool</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-database text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">DevOps · Storage</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Volume & Storage Pool</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="storage-search" oninput="storageDevRender()" placeholder="Cari storage…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-amber-400">
                     <button onclick="storageDevOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Storage</button>
@@ -2521,9 +2570,14 @@
              DEVOPS — CI/CD
              ════════════════════════════════════════════════════════════ -->
         <div id="devops-cicd-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#ec4899,#db2777)"><i class="fa-solid fa-code-branch"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">DevOps · CI/CD</div><div class="text-xs text-slate-400">Konfigurasi Pipeline, Runner, Variabel &amp; Credentials</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-code-branch text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">DevOps · CI/CD</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Konfigurasi Pipeline, Runner, Variabel & Credentials</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <button onclick="cicdOpenAddPipeline()" class="flex items-center gap-1.5 px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Buat Pipeline</button>
                 </div>
@@ -2550,9 +2604,14 @@
              SECOPS — IPS POOL
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-ips-pool-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><i class="fa-solid fa-network-wired"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · IPs Pool</div><div class="text-xs text-slate-400">Manajemen IP Address Pool &amp; Alokasi</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-network-wired text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Network SecOps · IPs Pool</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen IP Address Pool & Alokasi</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="ipspool-search" oninput="ipspoolRender()" placeholder="Cari pool…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-cyan-400">
                     <button onclick="ipspoolOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Pool</button>
@@ -2569,9 +2628,14 @@
              SECOPS — DOMAIN NS
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-domain-ns-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fa-solid fa-globe"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · Domain NS</div><div class="text-xs text-slate-400">Manajemen DNS Record &amp; Domain</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-globe text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Network SecOps · Domain NS</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen DNS Record & Domain</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="dns-search" oninput="dnsRender()" placeholder="Cari domain/record…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-48 focus:outline-none focus:border-violet-400">
                     <button onclick="dnsOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Record</button>
@@ -2588,9 +2652,14 @@
              SECOPS — EDR MANAGEMENT
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-edr-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fa-solid fa-shield-virus"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · EDR</div><div class="text-xs text-slate-400">Manajemen EDR Agent, Policy &amp; Ancaman</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-shield-virus text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Endpoint SecOps · EDR Management</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Antivirus, EDR, & Threat Detection</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="edrMgmt-search" oninput="edrMgmtRender()" placeholder="Cari agent…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-red-400">
                     <button onclick="edrMgmtOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Agent</button>
@@ -2607,9 +2676,14 @@
              SECOPS — WAF MANAGEMENT
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-waf-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#f97316,#ea580c)"><i class="fa-solid fa-fire-flame-curved"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · WAF</div><div class="text-xs text-slate-400">Manajemen WAF Rules, Policy &amp; Blocklist</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-fire-flame-curved text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Network SecOps · WAF</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen WAF Rules, Policy & Blocklist</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="wafMgmt-search" oninput="wafMgmtRender()" placeholder="Cari rule…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-orange-400">
                     <button onclick="wafMgmtOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Rule</button>
@@ -2626,9 +2700,14 @@
              SECOPS — PAM
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-pam-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#0f766e,#0d9488)"><i class="fa-solid fa-user-shield"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · PAM</div><div class="text-xs text-slate-400">Privileged Access Management &amp; Vault</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-user-shield text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Network SecOps · PAM</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Privileged Access Management & Vault</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <input id="pam-search" oninput="pamRender()" placeholder="Cari akun…" class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-44 focus:outline-none focus:border-teal-400">
                     <button onclick="pamOpenAdd()" class="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-plus text-[10px]"></i>Tambah Akun</button>
@@ -2645,9 +2724,14 @@
              SECOPS — ANALISIS KEAMANAN
              ════════════════════════════════════════════════════════════ -->
         <div id="sec-analisis-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#1e3a5f,#1e40af)"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Network SecOps · Analisis Keamanan</div><div class="text-xs text-slate-400">Vulnerability Assessment, Risk Score &amp; Audit Log</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-magnifying-glass-chart text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Network SecOps · Analisis Keamanan</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Vulnerability Assessment, Risk Score & Audit Log</p>
+                </div>
                 <div class="ml-auto flex gap-2">
                     <button onclick="analisisScan()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-radar text-[10px]"></i>Jalankan Scan</button>
                 </div>
@@ -2672,13 +2756,13 @@
              ════════════════════════════════════════════════════════════ -->
         <div id="nms-tiket-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
             <!-- Top bar -->
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">
-                    <i class="fa-solid fa-ticket"></i>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-ticket text-indigo-500 text-sm"></i>
                 </div>
-                <div>
-                    <div class="font-bold text-slate-800 text-sm">Manajemen Tiket</div>
-                    <div class="text-xs text-slate-400">Aduan &amp; Permohonan Layanan Infrastruktur DC</div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Manajemen Tiket</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Aduan & Permohonan Layanan Infrastruktur DC</p>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                     <button onclick="tiketOpenCreate()" class="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-black transition-colors shadow-sm">
@@ -2742,9 +2826,14 @@
              PENGATURAN — UMUM
              ════════════════════════════════════════════════════════════ -->
         <div id="umum-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#64748b,#475569)"><i class="fa-solid fa-sliders"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Pengaturan Umum</div><div class="text-xs text-slate-400">Manajemen Pengguna, Perangkat Daerah &amp; Master Data</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-sliders text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Pengaturan Umum</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Manajemen Pengguna, Perangkat Daerah & Master Data</p>
+                </div>
             </div>
             <div class="flex gap-0 px-6 bg-white border-b border-slate-200 flex-shrink-0">
                 <button id="umum-tab-btn-users" onclick="umumSwitchTab('users')" class="px-5 py-2.5 text-xs font-bold border-b-2 border-slate-600 text-slate-700">Pengguna</button>
@@ -2769,9 +2858,14 @@
              PENGATURAN — SISTEM
              ════════════════════════════════════════════════════════════ -->
         <div id="sistem-page" style="display:none" class="flex-1 flex flex-col overflow-hidden bg-slate-50/60">
-            <div class="flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 flex-shrink-0">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-md" style="background:linear-gradient(135deg,#1e3a5f,#1e40af)"><i class="fa-solid fa-gears"></i></div>
-                <div><div class="font-bold text-slate-800 text-sm">Pengaturan Sistem</div><div class="text-xs text-slate-400">Konfigurasi DCIM — SMTP, Domain, SSO, API &amp; Lainnya</div></div>
+            <div class="shrink-0 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="fas fa-gears text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-base font-extrabold text-slate-800">Pengaturan Sistem</h2>
+                    <p class="text-[10px] text-slate-400 font-medium">Konfigurasi DCIM — SMTP, Domain, SSO, API & Lainnya</p>
+                </div>
                 <div class="ml-auto"><button onclick="sistemSaveAll()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-black shadow-sm"><i class="fas fa-save text-[10px]"></i>Simpan Semua</button></div>
             </div>
             <div class="flex gap-0 px-6 bg-white border-b border-slate-200 flex-shrink-0">
@@ -4862,6 +4956,38 @@
             menu.classList.toggle('open');
             chevron.classList.toggle('open');
         }
+
+        // ===== ACCOUNT MENU FUNCTIONS =====
+        function toggleAccountMenu() {
+            const menu = document.getElementById('account-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showAccountInfo() {
+            toggleAccountMenu();
+            alert('Informasi Akun\n\nNama: Administrator\nEmail: admin@diskominfo.jabar.go.id\nJabatan: Penata Muda (III/a)\nRole: Administrator');
+        }
+
+        function showAccountSettings() {
+            toggleAccountMenu();
+            alert('Pengaturan Akun\n\nFitur pengaturan akun akan segera tersedia.');
+        }
+
+        function logout() {
+            toggleAccountMenu();
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                alert('Anda telah keluar dari sistem.');
+            }
+        }
+
+        // Close account menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('account-menu');
+            const profileArea = e.target.closest('[onclick="toggleAccountMenu()"]');
+            if (!profileArea && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
 
         // TAB NAVIGATION
         function switchTab(tab) {
